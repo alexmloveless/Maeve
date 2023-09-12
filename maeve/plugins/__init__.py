@@ -1,4 +1,4 @@
-
+from maeve import Globals as g
 
 class Plugins:
 
@@ -8,7 +8,7 @@ class Plugins:
     }
 
     __plugin_map = {
-        "Data": "codename.plugins.data"
+        "Data": f"{g.packagename}.plugins.data"
     }
 
     @classmethod

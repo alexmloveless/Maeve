@@ -1,10 +1,10 @@
 from maeve.util import Util
 from maeve.plugins import Plugins
+from maeve.plugins.data.extensions import DataFrame
 
 from confscade import Confscade
 import importlib
 from typing import Union
-import logging
 
 
 class Session:
@@ -26,7 +26,12 @@ class Session:
         self.log = Util.get_logger(__name__, log_level)
         self.conf = Confscade(conf) if conf else {}
 
-    def create(self, plugin: Union[str, list], *args, **kwargs):
+    def create(
+            self,
+            plugin: Union[str, list],
+            *args,
+            **kwargs
+    ):
         mod = self.find_plugin(plugin)
         return mod(self, *args, **kwargs)
 
