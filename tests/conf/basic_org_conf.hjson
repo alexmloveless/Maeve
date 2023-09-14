@@ -1,0 +1,11 @@
+{
+    "org" : {
+        "name" : "Maeve PLC."
+    },
+    "recipes" : {
+        "recipies_loc" : "./conf/recipes/"
+    },
+    "data" : {
+        "data_root" : "../data/data/"
+    },
+}

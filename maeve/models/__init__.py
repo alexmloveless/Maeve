@@ -2,21 +2,6 @@ from pydantic import BaseModel
 from typing import Literal, Optional, Union, Dict
 
 
-class Models:
-
-    _model_map = {
-
-    }
-
-    @staticmethod
-    def get(name):
-        pass
-
-####################################################
-#
-####################################################
-
-
 class DataAccessLoadGeneric(BaseModel):
     loader: str
     backend: Literal["pandas", "polars"] = "pandas"
@@ -45,3 +30,16 @@ class PipelineConf(BaseModel):
     metadata: Optional[dict] = {}
     stages: Dict[PipelineStageConf]
 
+
+class Models:
+    def __init__(self):
+        self._model_map = {
+            "data_access": DataAccessConf
+        }
+
+    @property
+    def model_map(self):
+        return self._model_map
+
+    def get(self, name):
+        return self._model_map[name]

@@ -1,10 +1,20 @@
 from maeve.util import Util
 import inspect
 
-
 class FunctionPipeline:
 
-    def run(self, obj=None, attrs=None):
+    def run_pipeline(self, conf):
+        if type(conf) is dict:
+            pass
+        elif type(conf) is list:
+            pass
+        elif type(conf) is str:
+            # assume it's a reference to a pipeline conf
+            pass
+        else:
+            raise ValueError("Unknown data type for pipeline conf")
+
+    def run_func(self, obj=None, attrs=None):
         args = attrs.get("args", [])
         kwargs = attrs.get("kwargs", {})
 

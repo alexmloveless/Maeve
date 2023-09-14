@@ -1,5 +1,6 @@
 from maeve.util import Util
 from maeve.plugins import Plugins
+from maeve.models.core import OrgConf, DataConf, RecipesConf
 from maeve.plugins.data.extensions import DataFrame
 
 from confscade import Confscade
@@ -24,7 +25,15 @@ class Session:
             If a list or a tuple is passed this should be ???
         """
         self.log = Util.get_logger(__name__, log_level)
-        self.conf = Confscade(conf) if conf else {}
+
+        self.org = Confscade(conf)
+        self.org_conf = OrgConf(**self.org.get("org"))
+        self.data_conf = DataConf(**self.org.get("data"))
+        self.recipes_conf = RecipesConf(**self.org.get("recipes"))
+        self.load_recipes()
+
+    def load_recipes(self):
+        self.recipes = Confscade(self.recipes_conf.recipes_loc)
 
     def create(
             self,
