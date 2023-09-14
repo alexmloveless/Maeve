@@ -1,3 +1,4 @@
+from maeve.catalogue import CatalogueClass
 
 class PolarsDataFrame:
     def __init__(self):
@@ -6,3 +7,7 @@ class PolarsDataFrame:
     def mangle_columns(self, df):
         df = df.rename({"track_name": "TESTING"})
         return df
+
+
+class PolarsDFCatalogue(CatalogueClass):
+    pass
