@@ -1,4 +1,4 @@
-from maeve.util import FSUtils, DictUtils
+from maeve.util import FSUtils, DictUtils, AnchorUtils
 from maeve.models.core import ConfscadeDefaults, GlobalConst
 
 from datetime import datetime
@@ -62,7 +62,12 @@ class Confscade:
     def filter_args(d: dict) -> dict:
         return {k: v for k, v in d.items() if v is not None}
 
-    def get(self, name: str, inherits: dict = None, exceptonmissing: bool = False) -> dict:
+    def get(self,
+            name: str,
+            inherits: dict = None,
+            exceptonmissing: bool = False,
+            parse_anchors: bool = True
+            ) -> dict:
         """
         Given a valid conf name returns a fully resolved config
 
@@ -81,7 +86,11 @@ class Confscade:
         The requested item in dictionary form
 
         """
-        return self.confscade(self.conf, name, inherits=inherits, exceptonmissing=exceptonmissing)
+        d = self.confscade(self.conf, name, inherits=inherits, exceptonmissing=exceptonmissing)
+        if parse_anchors:
+            return AnchorUtils.resolve_anchors(self.conf, d)
+        else:
+            return d
 
     def items(self):
         return list(self.conf.keys())

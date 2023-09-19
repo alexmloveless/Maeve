@@ -1,4 +1,4 @@
-from maeve.models.core import GlobalConst
+from maeve.models.core import GlobalConst, AnchorConst, ConfConst
 import logging
 import copy
 from os import path, walk
@@ -233,7 +233,6 @@ class FSUtils:
 
 class AnchorUtils:
 
-    from maeve.models.core import AnchorConst, ConfConst
     ac = AnchorConst()
     cc = ConfConst()
     g = GlobalConst()
