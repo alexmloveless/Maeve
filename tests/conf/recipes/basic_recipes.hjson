@@ -1,0 +1,22 @@
+{
+
+    "TestLocation" : {
+        "conf_type" : "location",
+        "location" : []
+    },
+    "TestNoPipeline" : {
+        "conf_type" : "data_access",
+        "load" : {
+            "loader" : "file",
+            "backend" : "pandas",
+            "location" : "",
+            "use_data_root" : true
+        }
+    },
+
+    "TestWithPipeline" : {
+        "inherits" : "TestNoPipeline",
+        "pipeline" : {}
+    }
+
+}
