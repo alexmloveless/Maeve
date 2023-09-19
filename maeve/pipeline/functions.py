@@ -1,18 +1,24 @@
-from maeve.util import Util
 import inspect
+from typing import Union
+
 
 class FunctionPipeline:
 
-    def run_pipeline(self, conf):
+    def __init__(self, session):
+        self.s = session
+
+    def run_pipeline(self, conf: Union[dict, list, str], obj=None):
         if type(conf) is dict:
-            pass
-        elif type(conf) is list:
-            pass
+            # keys are only there to help manage the order of funcs
+            conf = conf.values()
         elif type(conf) is str:
             # assume it's a reference to a pipeline conf
             pass
         else:
             raise ValueError("Unknown data type for pipeline conf")
+
+        for f in conf:
+            obj = self.run_func(obj, conf)
 
     def run_func(self, obj=None, attrs=None):
         args = attrs.get("args", [])

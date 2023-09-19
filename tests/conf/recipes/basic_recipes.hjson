@@ -1,15 +1,15 @@
 {
 
     "TestLocation" : {
-        "conf_type" : "location",
-        "location" : []
+        "conf_type" : "variable",
+        "value" : "mypath/somewhere"
     },
     "TestNoPipeline" : {
-        "conf_type" : "data_access",
+        "type" : "data_access",
         "load" : {
             "loader" : "file",
             "backend" : "pandas",
-            "location" : "",
+            "location" : "@TestLocation",
             "use_data_root" : true
         }
     },

@@ -9,6 +9,8 @@ import pkg_resources
 from functools import reduce
 import operator
 from typing import Union
+from collections import deque
+from datetime import datetime
 
 class Util:
 
@@ -25,6 +27,43 @@ class Util:
         if log_level:
             logger.setLevel(LOG_LEVELS[log_level])
         return logger
+
+
+class Logger:
+    def __init__(self, name, reg, log_level="WARNING", log_maxlen=1e+5):
+        self.name = name
+        self.reg = reg
+        if not hasattr(reg, name):
+            setattr(reg, name, deque([], int(log_maxlen)))
+
+        self._levels = {v: l for l, v in enumerate(
+            ["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]
+        )}
+        self.level = self._levels[log_level]
+
+    def debug(self, *args, **kwargs):
+        self.log("DEBUG", *args, **kwargs)
+    def info(self, *args, **kwargs):
+        self.log("INFO", *args, **kwargs)
+    def warning(self, *args, **kwargs):
+        self.log("WARNING", *args, **kwargs)
+    def error(self, *args, **kwargs):
+        self.log("error", *args, **kwargs)
+    def critical(self, *args, **kwargs):
+        self.log("critical", *args, **kwargs)
+
+    def log(self, level, source, message, detail=None):
+        if self._levels[level] >= self.level:
+            self.add_to_log(level, source, message, detail)
+
+    def add_to_log(self, level: str, source: str, message: str, detail: str = None):
+        getattr(self.reg, self.name).append((
+            datetime.now(),
+            level,
+            source,
+            message,
+            detail
+        ))
 
 
 class DictUtils:
@@ -238,11 +277,13 @@ class AnchorUtils:
     g = GlobalConst()
 
     @classmethod
-    def resolve_anchors(cls, cnf, obj: Union[list, dict]) -> dict:
+    def resolve_anchors(cls, cnf, obj: Union[list, dict], anchors: dict = None) -> dict:
         try:
             iterator = obj.items()
         except AttributeError:
             iterator = enumerate(obj)
+
+        anchors = anchors if anchors else {}
 
         for k, v in iterator:
             if type(v) in [dict, list]:
@@ -250,11 +291,15 @@ class AnchorUtils:
             elif type(v) is str:
                 if re.match(cls.g.anchor_match_regex, v):
                     identifier, keys = cls.parse_anchor(v)
-                    subcnf = cnf.get(identifier)
-                    if keys:
-                        obj[k] = DictUtils.deep_dict(subcnf, keys)
+
+                    if identifier in anchors.keys():
+                        obj[k] = anchors[identifier]
                     else:
-                        obj[k] = cnf[cls.g.var_conf_value_field]
+                        subcnf = cnf.get(identifier)
+                        if keys:
+                            obj[k] = DictUtils.deep_dict(subcnf, keys)
+                        else:
+                            obj[k] = cnf
             else:
                 continue
         return obj

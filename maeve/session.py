@@ -1,9 +1,11 @@
-from maeve.util import Util
+from maeve.util import Logger
 from maeve.plugins import Plugins
-from maeve.models.core import OrgConf, DataConf, RecipesConf, EnvConf
+from maeve.models.core import Globals, OrgConf, EnvConf, PluginParams
 from maeve.conf import Confscade
+from maeve.catalogue import Catalogue, Register
 from maeve.plugins.data.extensions import DataFrame
 
+import re
 import importlib
 from typing import Union
 
@@ -24,28 +26,77 @@ class Session:
             same principles apply as any other conf
             If a list or a tuple is passed this should be ???
         """
-        self.log = Util.get_logger(__name__, log_level)
 
-        self.org = Confscade(conf)
-        self.org_conf = OrgConf(**self.org.get("org"))
-        self.env_conf = EnvConf(**self.org.get("env"))
-        self.data_conf = DataConf(**self.org.get("data"))
-        self.recipes_conf = RecipesConf(**self.org.get("recipes"))
-        self.load_recipes()
+        self.g = Globals()  # package level immutables
+        self.c = Catalogue()  # the store of mutable shared objects and metadata
+        self.r = Register()  # mutable shared variables e.g. recipes
 
-        self.r = self.recipes
+        self.r._org = Confscade(conf)
+        self.r.org = OrgConf(**self.r.org.get("org"))
+        self.r.env = EnvConf(**self.r.org.get("env"))
 
-    def load_recipes(self):
-        self.recipes = Confscade(self.recipes_conf.recipes_loc)
+        self.log = Logger("main", self.r, log_level=log_level, log_maxlen=self.r.env.log_maxlen)
+        self.r.recipes = self.get_recipes()
 
-    def create(
+
+    def get_recipes(self, loc: Union[str, list] = None):
+        if not loc:
+            if self.r.env.recipes_loc:
+                loc = self.r.env.recipes_loc
+            else:
+                self.log.debug(__name__, "No recipes locations found")
+                return None
+        return Confscade(loc)
+
+    def cook(self,
+             recipe,
+             add_to_catalogue: bool = True,
+             anchors: dict = None,
+             catalogue_metadata: dict = None
+             ):
+        recipe = self.r.recipes.get(recipe, anchors=anchors)
+
+        try:
+            plugin = recipe[self.g.conf.type_field]
+        except KeyError:
+            raise ValueError(f"Cannot load a recipe without a '{self.g.conf.type_field} field'")
+
+        params = recipe.get(self.g.conf.init_params_field, {})
+        obj = self.run_plugin(plugin, params)
+        if add_to_catalogue:
+            cm = catalogue_metadata
+            cm["source"] = cm.get("source", plugin)
+            cm["obj_type"] = cm.get("obj_type", type(obj))
+            cm["name"] = cm.get("name", recipe)
+
+            if anchors:
+                cm["protect"] = "increment"
+            else:
+                cm["protect"] = "overwrite"
+
+            self.c.add(obj, **cm)
+
+
+
+    def run_plugin(
             self,
             plugin: Union[str, list],
-            *args,
-            **kwargs
+            params: dict = None
     ):
-        mod = self.find_plugin(plugin)
-        return mod(self, *args, **kwargs)
+        params = params if params else {}
+        params = PluginParams(**params)
+        name, method = self.parse_plugin_name(plugin)
+        mod = self.find_plugin(name)(*params.class_args, **params.class_kwargs)
+        if not method:
+            method = self.g.conf.plugin_default_entrypoint
+        return getattr(mod, method)(self, *params.method_args, **params.method_kwargs)
+
+    def parse_plugin_name(self, name):
+        parts = re.split(self.g.conf.plugin_delim, name)
+        try:
+            return parts[0], parts[1]
+        except KeyError:
+            return parts[0], None
 
     def find_plugin(self, plugin: Union[str, list, tuple]):
         if type(plugin) is str:
