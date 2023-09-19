@@ -66,7 +66,8 @@ class Confscade:
             name: str,
             inherits: dict = None,
             exceptonmissing: bool = False,
-            parse_anchors: bool = True
+            parse_anchors: bool = True,
+            anchors: dict = None
             ) -> dict:
         """
         Given a valid conf name returns a fully resolved config
@@ -88,7 +89,7 @@ class Confscade:
         """
         d = self.confscade(self.conf, name, inherits=inherits, exceptonmissing=exceptonmissing)
         if parse_anchors:
-            return AnchorUtils.resolve_anchors(self.conf, d)
+            return AnchorUtils.resolve_anchors(self.conf, d, anchors=anchors)
         else:
             return d
 

@@ -2,10 +2,8 @@
     "org" : {
         "name" : "Maeve PLC."
     },
-    "recipes" : {
-        "recipies_loc" : "./conf/recipes/"
-    },
-    "data" : {
+    "env" : {
         "data_root" : "../data/data/"
+        "recipies_loc" : "./conf/recipes/"
     },
 }

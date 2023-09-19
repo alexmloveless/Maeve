@@ -15,7 +15,10 @@ class GlobalConst(BaseModel):
 
 
 class ConfConst(BaseModel):
-    var_value_field: str = "value"
+    type_field: str = "type"
+    init_params_field: str = "init_params"
+    plugin_delim: str = r"\."
+    plugin_default_entrypoint: str = "main"
 
     class Config:
         frozen = True
@@ -30,6 +33,20 @@ class AnchorConst(BaseModel):
         frozen = True
 
 
+class ConstValidator(BaseModel):
+    core: dict = {}
+    conf: dict = {}
+    anchor: dict = {}
+
+
+class Globals:
+    def __init__(self, **kwargs):
+        self.models = ConstValidator(**kwargs)
+        self.core = GlobalConst(**self.models.core)
+        self.conf = GlobalConst(**self.models.conf)
+        self.anchor = GlobalConst(**self.models.anchor)
+
+
 ###############################
 #  Mutable models
 ###############################
@@ -40,19 +57,17 @@ class OrgConf(BaseModel):
 
 class EnvConf(BaseModel):
     name: str = "default"
+    log_maxlen: int = int(1e+5)
     type: Optional[str] = None
-
-
-class DataConf(BaseModel):
     data_root: Union[str, list] = None
+    recipes_loc: Union[str, list] = None
 
 
-class RecipesConf(BaseModel):
-    config_root: Union[str, list] = None
-
-
-class LocConf(BaseModel):
-    name: str
+class PluginParams(BaseModel):
+    method_args: list = []
+    method_kwargs: dict = {}
+    class_args: list = []
+    class_kwargs: dict = {}
 
 
 class ConfscadeDefaults(BaseModel):
