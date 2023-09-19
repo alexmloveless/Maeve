@@ -1,9 +1,9 @@
 from maeve.util import Util
 from maeve.plugins import Plugins
-from maeve.models.core import OrgConf, DataConf, RecipesConf
+from maeve.models.core import OrgConf, DataConf, RecipesConf, EnvConf
+from maeve.conf import Confscade
 from maeve.plugins.data.extensions import DataFrame
 
-from confscade import Confscade
 import importlib
 from typing import Union
 
@@ -28,9 +28,12 @@ class Session:
 
         self.org = Confscade(conf)
         self.org_conf = OrgConf(**self.org.get("org"))
+        self.env_conf = EnvConf(**self.org.get("env"))
         self.data_conf = DataConf(**self.org.get("data"))
         self.recipes_conf = RecipesConf(**self.org.get("recipes"))
         self.load_recipes()
+
+        self.r = self.recipes
 
     def load_recipes(self):
         self.recipes = Confscade(self.recipes_conf.recipes_loc)
