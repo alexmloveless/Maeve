@@ -16,7 +16,7 @@
 
     "TestWithPipeline" : {
         "inherits" : "TestNoPipeline",
-        "pipeline" : {}
+        "process" : {}
     }
 
 }

@@ -62,7 +62,9 @@ class Session:
             raise ValueError(f"Cannot load a recipe without a '{self.g.conf.type_field} field'")
 
         params = recipe.get(self.g.conf.init_params_field, {})
-        obj = self.run_plugin(plugin, params)
+        name, method = self.parse_plugin_name(plugin)
+        mod = self.init_plugin(name, params)
+        obj = self.run_plugin(mod, recipe, method=method)
         if add_to_catalogue:
             cm = catalogue_metadata
             cm["source"] = cm.get("source", plugin)
@@ -76,20 +78,19 @@ class Session:
 
             self.c.add(obj, **cm)
 
-
-
-    def run_plugin(
+    def init_plugin(
             self,
             plugin: Union[str, list],
             params: dict = None
     ):
         params = params if params else {}
         params = PluginParams(**params)
-        name, method = self.parse_plugin_name(plugin)
-        mod = self.find_plugin(name)(*params.class_args, **params.class_kwargs)
+        return self.find_plugin(plugin)(self, *params.class_args, **params.class_kwargs)
+
+    def run_plugin(self, mod, recipe, method: str = None):
         if not method:
             method = self.g.conf.plugin_default_entrypoint
-        return getattr(mod, method)(self, *params.method_args, **params.method_kwargs)
+        return getattr(mod, method)(self, recipe)
 
     def parse_plugin_name(self, name):
         parts = re.split(self.g.conf.plugin_delim, name)
@@ -116,4 +117,4 @@ class Session:
             return getattr(mod, plugin)
         else:
             raise TypeError(f"Invalid type {type(plugin)} passed for plugin")
-
+        return mod
