@@ -64,8 +64,6 @@ class EnvConf(BaseModel):
 
 
 class PluginParams(BaseModel):
-    method_args: list = []
-    method_kwargs: dict = {}
     class_args: list = []
     class_kwargs: dict = {}
 

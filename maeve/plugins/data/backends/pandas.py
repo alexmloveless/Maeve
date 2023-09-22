@@ -1,4 +1,5 @@
-from maeve.catalogue import CatalogueClass
+import pandas as pd
+
 
 class PandasDataFrame:
     def __init__(self):
@@ -9,5 +10,6 @@ class PandasDataFrame:
         return df
 
 
-class PandasDFCatalogue(CatalogueClass):
-    pass
+class PandasLoaders:
+    def load_csv(*args, **kwargs):
+        return pd.read_csv(*args, **kwargs)
