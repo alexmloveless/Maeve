@@ -1,4 +1,4 @@
-from maeve.models.core import GlobalConst, AnchorConst, ConfConst
+from maeve.models.core import GlobalConst, AnchorConst, ConfConst, FuncConf
 import logging
 import copy
 from os import path, walk
@@ -315,4 +315,75 @@ class AnchorUtils:
         except KeyError:
             return matches[0], None
 
+class FuncUtils:
 
+    @classmethod
+    def run_func(
+            cls,
+            recipe: Union[dict, FuncConf],
+            obj=None,
+            ns=None,
+            logger=None
+    ):
+        """
+            Either obj or ns (or both) must be passed
+            If ns is not passed, all functions must
+            exist in the object namespace
+        """
+        if type(recipe) is dict:
+            recipe = FuncConf(**recipe)
+
+        if obj is not None:
+            # try and get the func from the obj namespace
+            try:
+                func = getattr(obj, recipe.function)
+            except AttributeError:
+                try:
+                    func = getattr(ns, recipe.function)
+                except AttributeError:
+                    cls.handle_func_fail(recipe, f"No know func called {recipe.function}")
+            return cls._func(func, recipe, obj, logger)
+        else:
+            try:
+                func = getattr(ns, recipe.function)
+            except AttributeError:
+                cls.handle_func_fail(recipe, f"No know func called {recipe.function}")
+            return cls._func(func, recipe, obj, logger)
+
+    @classmethod
+    def _func(cls, func, recipe, obj=None, logger=None):
+        try:
+            if obj is None:
+                return func(*recipe.args, **recipe.kwargs)
+            else:
+                return func(obj, *recipe.args, **recipe.kwargs)
+        except Exception as e:
+            _ = cls.handle_func_fail(recipe, e, logger=logger)
+            return obj
+
+    @staticmethod
+    def handle_func_fail(recipe, e, ret=None, logger=None):
+        message = f"Pipeline function {recipe.function} failed with error {e}"
+        if recipe.fail_silently:
+            if logger:
+                logger.info(message)
+            else:
+                print(message)
+            return ret
+        else:
+            raise RuntimeError(message)
+
+
+    @classmethod
+    def run_pipeline(cls, conf: Union[dict, list, str], obj=None):
+        if type(conf) is dict:
+            # keys are only there to help manage the order of funcs
+            conf = conf.values()
+        elif type(conf) is str:
+            # assume it's a reference to a pipeline conf
+            pass
+        else:
+            raise ValueError("Unknown data type for pipeline conf")
+
+        for f in conf:
+            obj = FuncUtils.run_func(obj, conf)
