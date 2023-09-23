@@ -6,9 +6,9 @@
     },
     "TestNoPipeline" : {
         "type" : "data_access",
+        "backend" : "pandas",
         "load" : {
             "loader" : "file",
-            "backend" : "pandas",
             "location" : "@TestLocation",
             "use_data_root" : true
         }

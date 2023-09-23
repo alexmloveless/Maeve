@@ -75,3 +75,26 @@ class ConfscadeDefaults(BaseModel):
     MINIMUM_CONF: Optional[dict] = {}
     ERROR_ON_NOTFOUND: Optional[bool] = False
     OUTPUT_DATETIME_FMT: Optional[str] = "%Y-%m-%d %H:%M:%S"
+
+class FuncRecipe(BaseModel):
+    function: str
+    args: Optional[list] = None
+    kwargs: Optional[dict] = None
+    fail_silently: bool = False
+
+
+class DataLoader(BaseModel):
+    loader: FuncRecipe
+    location: Optional[str] = None
+    filters: Optional[list] = None
+    columns: Optional[list] = None
+    process: Optional[Union[dict, list, str]] = None
+    use_data_root: bool = True
+
+
+class DataRecipe(BaseModel):
+    backend: str = "pandas"
+    load: FuncRecipe
+    metadata: dict = {}
+    process: Optional[Union[dict, list, str]] = None
+    write: Optional[str] = None # think this always has to be a recipe name

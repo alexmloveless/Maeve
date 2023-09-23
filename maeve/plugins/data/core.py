@@ -1,24 +1,10 @@
-from .backends.pandas import PandasLoaders
-from .backends.polars import PolarsLoaders
+from maeve.util import FuncUtils
+from maeve.models.core import DataLoader, DataRecipe
 
 from pydantic import BaseModel
 from typing import get_type_hints, Optional, Union
+import importlib
 
-
-class Loader(BaseModel):
-    type: str
-    backend: str = "pandas"
-    location: Optional[str] = None
-    filters: Optional[list] = None
-    columns: Optional[list] = None
-    process: Optional[Union[dict, list, str]] = None
-    use_data_root: bool = True
-
-class DataRecipe(BaseModel):
-    metadata: dict = {}
-    load: Optional[dict] = None
-    process: Optional[Union[dict, list, str]] = None
-    write: Optional[str] = None # think this always has to be a recipe name
 
 class Data:
     def __init__(self, session=None):
@@ -26,9 +12,29 @@ class Data:
 
     def main(self, recipe: dict):
         recipe = DataRecipe(**recipe)
-        self.stages(recipe)
+        backend = Data.get_backend(recipe.backend)
+        obj = self.stages(recipe, backend)
+        return obj
 
-    def stages(self, recipe):
+    @staticmethod
+    def get_backend(backend):
+        return importlib.import_module(backend)
+
+    def stages(self, recipe, backend):
+        try:
+            loc = recipe.load.location
+        except AttributeError:
+            # complain
+            pass
+        # add loc to args then run run_func()
+        df = getattr(backend, recipe.load.loader)(
+            loc, *recipe.load.args, **recipe.load.kwargs
+        )
+        # need to adjust anchor utils so that it can handle "special" variables, the first being "location"
+        # which will have a "use_root" field that will be used to prepend the value
+        obj = FuncUtils.run_func(
+            recipe=recipe.load.loader
+        )
         if recipe.load:
             pass
         if recipe.process:
@@ -36,10 +42,18 @@ class Data:
         if recipe.write:
             pass
 
+        return df
+
     def load(self, recipe):
         pass
 
 class Loaders:
+    def __init__(self, recipe: BaseModel):
+        self.backend = recipe.load.backend
+
+    @classmethod
+    def load(cls, recipe):
+        return getattr(cls, recipe.load.loader)(recipe)
 
     def loader(func):
         # loader decorator that parses the model etc.
