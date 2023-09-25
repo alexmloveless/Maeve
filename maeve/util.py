@@ -1,4 +1,8 @@
-from maeve.models.core import GlobalConst, AnchorConst, ConfConst, FuncConf
+import maeve.conf
+from maeve.models.core import (
+    GlobalConst, AnchorConst, ConfConst, FuncRecipe, LocationRecipe, ModelInfo
+)
+
 import logging
 import copy
 from os import path, walk
@@ -277,7 +281,10 @@ class AnchorUtils:
     g = GlobalConst()
 
     @classmethod
-    def resolve_anchors(cls, cnf, obj: Union[list, dict], anchors: dict = None) -> dict:
+    def resolve_anchors(cls,
+                cnf: maeve.conf.Confscade,
+                obj: Union[list, dict],
+                anchors: dict = None) -> dict:
         try:
             iterator = obj.items()
         except AttributeError:
@@ -295,9 +302,10 @@ class AnchorUtils:
                     if identifier in anchors.keys():
                         obj[k] = anchors[identifier]
                     else:
-                        subcnf = cnf.get(identifier)
+                        # grab a nested object
+                        sub_conf = cnf.get(identifier)
                         if keys:
-                            obj[k] = DictUtils.deep_dict(subcnf, keys)
+                            obj[k] = DictUtils.deep_dict(sub_conf, keys)
                         else:
                             obj[k] = cnf
             else:
@@ -315,12 +323,20 @@ class AnchorUtils:
         except KeyError:
             return matches[0], None
 
+    def resolve_special_recipe(self, recipe):
+        # resolve via models?
+        pass
+
+    def location(self, recipe):
+        pass
+
+
 class FuncUtils:
 
     @classmethod
     def run_func(
             cls,
-            recipe: Union[dict, FuncConf],
+            recipe: Union[dict, FuncRecipe],
             obj=None,
             ns=None,
             logger=None
@@ -331,7 +347,7 @@ class FuncUtils:
             exist in the object namespace
         """
         if type(recipe) is dict:
-            recipe = FuncConf(**recipe)
+            recipe = FuncRecipe(**recipe)
 
         if obj is not None:
             # try and get the func from the obj namespace

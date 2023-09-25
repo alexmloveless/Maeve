@@ -1,0 +1,22 @@
+[tool.poetry]
+name = "maeve"
+version = "0.1.0"
+description = "Rapid and Reproducable Data Shenanigans!"
+authors = [
+    "Alex Loveless <alex@alexloveless.uk>",
+    "Pete Hodge <pete_hodge@hotmail.com>"
+]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.11"
+pandas = "^2.0"
+pydantic = "^2.0"
+polars = "^0.19"
+pyarrow = "^10.0"
+hjson = "^3.0"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
