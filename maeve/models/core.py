@@ -1,5 +1,8 @@
-from pydantic import BaseModel
-from typing import Literal, Optional, Union, Dict
+from pydantic import BaseModel, model_validator
+from typing import Literal, Optional, Union
+
+import os
+
 
 ###############################
 #  Constants
@@ -98,3 +101,38 @@ class DataRecipe(BaseModel):
     metadata: dict = {}
     process: Optional[Union[dict, list, str]] = None
     write: Optional[str] = None # think this always has to be a recipe name
+
+
+class LocationRecipe(BaseModel):
+    conf_type: Literal["location"]
+    use_root: Optional[Literal["data", "recipe"]] = None
+    path: str
+    orig_path: Optional[str] = None
+    root_paths: Optional[dict] = None
+
+    @model_validator(mode="after")
+    def resolve_path(self):
+        if not self.root_paths:
+            return self
+        if self.use_root:
+            self.orig_path = self.path
+            try:
+                self.path = os.path.join(self.root_paths[self.use_root], self.path)
+            except KeyError:
+                raise ValueError(f"root_path `{self.use_root}` not found in provided paths")
+        return self
+
+
+###############################
+#  Model Meta
+###############################
+
+class ModelInfo:
+
+    _alias_map = {
+        "location": LocationRecipe
+    }
+    @classmethod
+    def model_alias(cls, alias):
+        return cls._alias_map[alias]
+

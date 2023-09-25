@@ -1,8 +1,9 @@
 {
 
     "TestLocation" : {
-        "conf_type" : "variable",
-        "value" : "mypath/somewhere"
+        "conf_type" : "location",
+        "location" : "mypath/somewhere",
+        "use_root" : "data"
     },
     "TestNoPipeline" : {
         "type" : "data_access",
@@ -10,7 +11,6 @@
         "load" : {
             "loader" : "file",
             "location" : "@TestLocation",
-            "use_data_root" : true
         }
     },
 
