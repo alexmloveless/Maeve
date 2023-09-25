@@ -1,5 +1,6 @@
+from maeve.util import Logger
 from maeve.util import FSUtils, DictUtils, AnchorUtils
-from maeve.models.core import ConfscadeDefaults, GlobalConst
+from maeve.models.core import ConfscadeDefaults, GlobalConst, EnvConf
 
 from datetime import datetime
 import json
@@ -7,13 +8,14 @@ from os import path, listdir
 import logging
 import re
 
-from typing import Union
+from typing import Union, Optional
 
 
 class Confscade:
 
     def __init__(self,
                  config,
+                 env_conf: dict = None,
                  defaultkey: str =None,
                  global_default_conf: dict = None,
                  error_on_notfound: bool = None,
@@ -37,14 +39,15 @@ class Confscade:
         log_level: str
             The log level,
         """
+        if env_conf:
+            self.e = env_conf
+        else:
+            self.e = EnvConf()
 
-        if log_level:
-            logging.getLogger(__name__).setLevel(g.LOG_LEVELS[log_level])
-        self.log = logging.getLogger(__name__)
-
+        self.log = Logger(log_level=log_level, log_maxlen=self.e.log_maxlen)
         self.g = GlobalConst()
 
-        self.fs = FSUtils(log_level=log_level)
+        self.fs = FSUtils()
 
         confdict = self.filter_args({
             "GLOBAL_DEFAULT_CONF": global_default_conf,
@@ -89,25 +92,24 @@ class Confscade:
         """
         d = self.confscade(self.conf, name, inherits=inherits, exceptonmissing=exceptonmissing)
         if parse_anchors:
-            return AnchorUtils.resolve_anchors(self.conf, d, anchors=anchors)
+            return AnchorUtils.resolve_anchors(self.conf, d, anchors=anchors, env_conf=self.e)
         else:
             return d
 
     def items(self):
         return list(self.conf.keys())
 
-    def get_conf(self, config: Union[dict, str]):
-        if not config:
-            cfg = {}
-        else:
-            # if not a valid JSON string return the original string
-            cfg = self.load_json_string(config)
+    def get_conf(self, config: Optional[Union[list, dict, str]] = None):
+        if config:
+            if type(config) is dict:
+                config = config.values()
+            elif type(config) is str:
+                # if not a valid JSON string returns the original string
+                cfg = self.load_json_string(config)
 
-        if type(cfg) is dict:
-            self.conf = cfg
-        else:
-            # if it's not dict or JSON string we assume it's a file path
             self.get_conf_from_files(config)
+        else:
+            self.conf = {}
 
         # We add in a global default so that there's always something for cascading confs to roll up to
         if not self.conf:
@@ -116,7 +118,7 @@ class Confscade:
 
     def get_conf_from_files(
             self,
-            filepath: str,
+            filepath: Union[str, list],
             fileregex: str = r".+\.h?json$",
     ):
 

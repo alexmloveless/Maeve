@@ -3,7 +3,9 @@
         "name" : "Maeve PLC."
     },
     "env" : {
-        "data_root" : "../data/data/"
-        "recipies_loc" : "./conf/recipes/"
+        "recipes_root" : "/Users/alex/Dropbox/Projects/pypackages/Maeve/tests/conf/recipes/"
+        "paths" : {
+            "test_data" : "/Users/alex/Dropbox/Projects/pypackages/Maeve/tests/data/data"
+        }
     },
 }

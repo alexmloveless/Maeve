@@ -1,9 +1,7 @@
-import maeve.conf
 from maeve.models.core import (
-    GlobalConst, AnchorConst, ConfConst, FuncRecipe, LocationRecipe, ModelInfo
+    GlobalConst, AnchorConst, FuncRecipe, LogConst, LocationRecipe
 )
 
-import logging
 import copy
 from os import path, walk
 import re
@@ -12,63 +10,55 @@ import hjson
 import pkg_resources
 from functools import reduce
 import operator
-from typing import Union
+from typing import Union, Optional
 from collections import deque
 from datetime import datetime
-
-class Util:
-
-    def get_logger(self, name: str, log_level: str = "WARNING"):
-
-        LOG_LEVELS = {
-            "DEBUG": logging.DEBUG,
-            "INFO": logging.INFO,
-            "WARNING": logging.WARNING,
-            "ERROR": logging.ERROR,
-            "CRITICAL": logging.CRITICAL
-        }
-        logger = logging.getLogger(name)
-        if log_level:
-            logger.setLevel(LOG_LEVELS[log_level])
-        return logger
+import pandas as pd
 
 
 class Logger:
-    def __init__(self, name, reg, log_level="WARNING", log_maxlen=1e+5):
-        self.name = name
-        self.reg = reg
-        if not hasattr(reg, name):
-            setattr(reg, name, deque([], int(log_maxlen)))
+    def __init__(self, log_level=None, log_maxlen=1e+5):
+        self.g = LogConst()
 
-        self._levels = {v: l for l, v in enumerate(
-            ["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]
-        )}
+        log_level = log_level if log_level else self.g.default_level
+
+        self._levels = {v: level for level, v in enumerate(self.g.levels)}
         self.level = self._levels[log_level]
+        self._log = deque([], int(log_maxlen))
 
     def debug(self, *args, **kwargs):
         self.log("DEBUG", *args, **kwargs)
+
     def info(self, *args, **kwargs):
         self.log("INFO", *args, **kwargs)
+
     def warning(self, *args, **kwargs):
         self.log("WARNING", *args, **kwargs)
-    def error(self, *args, **kwargs):
-        self.log("error", *args, **kwargs)
-    def critical(self, *args, **kwargs):
-        self.log("critical", *args, **kwargs)
 
-    def log(self, level, source, message, detail=None):
+    def error(self, *args, **kwargs):
+        self.log("ERROR", *args, **kwargs)
+
+    def critical(self, *args, **kwargs):
+        self.log("CRITICAL", *args, **kwargs)
+
+    def log(self, level, message, detail=None):
         if self._levels[level] >= self.level:
-            self.add_to_log(level, source, message, detail)
+            self.add_to_log(level, message, detail)
 
     def add_to_log(self, level: str, source: str, message: str, detail: str = None):
-        getattr(self.reg, self.name).append((
-            datetime.now(),
-            level,
-            source,
-            message,
-            detail
-        ))
+        self._log.append({
+            self.g.timestamp_label: datetime.now(),
+            self.g.level_label: level,
+            self.g.source_label: source,
+            self.g.message_label: message,
+            self.g.detail_label: detail
+        })
 
+    def get_log(self, fmt="df"):
+        if fmt in ["df", "dataframe"]:
+            return pd.DataFrame.from_records(self._log)
+        else:
+            return self._log
 
 class DictUtils:
     g = GlobalConst()
@@ -277,13 +267,12 @@ class FSUtils:
 class AnchorUtils:
 
     ac = AnchorConst()
-    cc = ConfConst()
-    g = GlobalConst()
 
     @classmethod
     def resolve_anchors(cls,
-                cnf: maeve.conf.Confscade,
+                cnf: dict,
                 obj: Union[list, dict],
+                env_conf,
                 anchors: dict = None) -> dict:
         try:
             iterator = obj.items()
@@ -294,20 +283,23 @@ class AnchorUtils:
 
         for k, v in iterator:
             if type(v) in [dict, list]:
-                cls.resolve_anchors(cnf, v)
+                cls.resolve_anchors(cnf, v, env_conf)
             elif type(v) is str:
-                if re.match(cls.g.anchor_match_regex, v):
+                if re.match(cls.ac.match_regex, v):
                     identifier, keys = cls.parse_anchor(v)
 
                     if identifier in anchors.keys():
-                        obj[k] = anchors[identifier]
+                        new_val = anchors[identifier]
                     else:
                         # grab a nested object
                         sub_conf = cnf.get(identifier)
                         if keys:
-                            obj[k] = DictUtils.deep_dict(sub_conf, keys)
+                            new_val = DictUtils.deep_dict(sub_conf, keys)
                         else:
-                            obj[k] = cnf
+                            new_val = sub_conf
+                    if type(new_val) is dict:
+                        new_val = cls.resolve_recipe(new_val, env_conf)
+                    obj[k] = new_val
             else:
                 continue
         return obj
@@ -323,12 +315,10 @@ class AnchorUtils:
         except KeyError:
             return matches[0], None
 
-    def resolve_special_recipe(self, recipe):
-        # resolve via models?
-        pass
-
-    def location(self, recipe):
-        pass
+    @classmethod
+    def resolve_recipe(cls, recipe, env_conf):
+        if recipe["recipe_type"] == "location":
+            return LocationRecipe(paths=env_conf.paths, **recipe).model_dump()
 
 
 class FuncUtils:
@@ -391,15 +381,10 @@ class FuncUtils:
 
 
     @classmethod
-    def run_pipeline(cls, conf: Union[dict, list, str], obj=None):
+    def run_pipeline(cls, conf: Union[dict, list], obj=None):
         if type(conf) is dict:
-            # keys are only there to help manage the order of funcs
+            # keys are only there to help manage the order of funcs and facilitate merges
             conf = conf.values()
-        elif type(conf) is str:
-            # assume it's a reference to a pipeline conf
-            pass
-        else:
-            raise ValueError("Unknown data type for pipeline conf")
 
         for f in conf:
-            obj = FuncUtils.run_func(obj, conf)
+            obj = FuncUtils.run_func(obj, f)

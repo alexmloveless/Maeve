@@ -8,8 +8,3 @@ class PandasDataFrame:
     def mangle_columns(self, df):
         df = df.rename(columns={"track_name": "TESTING"})
         return df
-
-
-class PandasLoaders:
-    def load_csv(*args, **kwargs):
-        return pd.read_csv(*args, **kwargs)

@@ -32,29 +32,40 @@ class Session:
         self.r = Register()  # mutable shared variables e.g. recipes
 
         self.r._org = Confscade(conf)
-        self.r.org = OrgConf(**self.r.org.get("org"))
-        self.r.env = EnvConf(**self.r.org.get("env"))
+        self.r.org = OrgConf(**self.r._org.get("org"))
+        self.r.env = EnvConf(**self.r._org.get("env"))
 
-        self.log = Logger("main", self.r, log_level=log_level, log_maxlen=self.r.env.log_maxlen)
+        self.log = self.c.add(
+            Logger(log_level=log_level, log_maxlen=self.r.env.log_maxlen),
+            "session_log",
+            source=__name__,
+            obj_type="maeve.util.Logger",
+            description="The session log. Inspect object for methods for interrogating.",
+            return_item=True
+        )
         self.r.recipes = self.get_recipes()
 
 
     def get_recipes(self, loc: Union[str, list] = None):
         if not loc:
-            if self.r.env.recipes_loc:
-                loc = self.r.env.recipes_loc
+            if self.r.env.recipes_root:
+                loc = self.r.env.recipes_root
             else:
-                self.log.debug(__name__, "No recipes locations found")
+                self.log.debug("No recipes locations found")
                 return None
-        return Confscade(loc)
+        return Confscade(loc, env_conf=self.r.env)
 
     def cook(self,
              recipe,
              add_to_catalogue: bool = True,
              anchors: dict = None,
-             catalogue_metadata: dict = None
+             catalogue_metadata: dict = None,
+             return_obj: bool = True
              ):
+        recipe_name = recipe
         recipe = self.r.recipes.get(recipe, anchors=anchors)
+
+        # TODO: options to use what's in catalogue
 
         try:
             plugin = recipe[self.g.conf.type_field]
@@ -66,10 +77,10 @@ class Session:
         mod = self.init_plugin(name, params)
         obj = self.run_plugin(mod, recipe, method=method)
         if add_to_catalogue:
-            cm = catalogue_metadata
+            cm = catalogue_metadata if catalogue_metadata else {}
             cm["source"] = cm.get("source", plugin)
-            cm["obj_type"] = cm.get("obj_type", type(obj))
-            cm["name"] = cm.get("name", recipe)
+            cm["obj_type"] = cm.get("obj_type", str(type(obj)))
+            cm["name"] = cm.get("name", recipe_name)
 
             if anchors:
                 cm["protect"] = "increment"
@@ -77,6 +88,9 @@ class Session:
                 cm["protect"] = "overwrite"
 
             self.c.add(obj, **cm)
+
+        if return_obj:
+            return obj
 
     def init_plugin(
             self,
@@ -90,22 +104,23 @@ class Session:
     def run_plugin(self, mod, recipe, method: str = None):
         if not method:
             method = self.g.conf.plugin_default_entrypoint
-        return getattr(mod, method)(self, recipe)
+        return getattr(mod, method)(recipe)
 
     def parse_plugin_name(self, name):
         parts = re.split(self.g.conf.plugin_delim, name)
         try:
             return parts[0], parts[1]
-        except KeyError:
+        except IndexError:
             return parts[0], None
 
     def find_plugin(self, plugin: Union[str, list, tuple]):
         if type(plugin) is str:
-            bundled_plugin = Plugins.resolve_plugin(plugin)
+            bundled_plugin, cls = Plugins.resolve_plugin(plugin)
             if bundled_plugin:
                 # see if it's a bundled plugin
                 self.log.debug(f"Found bundled plugin {bundled_plugin} attempting to import via {__name__}")
                 mod = importlib.import_module(bundled_plugin)
+                return getattr(mod, cls)
             else:
                 try:
                     # otherwise try and import from system
@@ -114,7 +129,7 @@ class Session:
                 except ModuleNotFoundError:
                     # give up
                     raise ValueError(f"No plugin found with name {plugin}")
-            return getattr(mod, plugin)
+                return getattr(mod, plugin)
         else:
             raise TypeError(f"Invalid type {type(plugin)} passed for plugin")
         return mod

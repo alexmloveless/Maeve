@@ -18,7 +18,7 @@ class GlobalConst(BaseModel):
 
 
 class ConfConst(BaseModel):
-    type_field: str = "type"
+    type_field: str = "recipe_type"
     init_params_field: str = "init_params"
     plugin_delim: str = r"\."
     plugin_default_entrypoint: str = "main"
@@ -31,10 +31,26 @@ class AnchorConst(BaseModel):
     prefix: str = "@"
     match_regex: str = r"^@[\w+]"
     sub_regex: str = r"^@"
+    root_paths_attrs: dict = {
+            "data_root": "data_root",  # should mirror name in EnvConf
+            "recipes_root": "recipes_root"  # should mirror name in EnvConf
+        }
 
     class Config:
         frozen = True
 
+
+class LogConst(BaseModel):
+    levels: list = ["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]
+    default_level: str = "WARNING"
+    timestamp_label: str = "Timestamp"
+    level_label: str = "Level"
+    source_label: str = "Source"
+    message_label: str = "Message"
+    detail_label: str = "Detail"
+
+    class Config:
+        frozen = True
 
 class ConstValidator(BaseModel):
     core: dict = {}
@@ -46,8 +62,8 @@ class Globals:
     def __init__(self, **kwargs):
         self.models = ConstValidator(**kwargs)
         self.core = GlobalConst(**self.models.core)
-        self.conf = GlobalConst(**self.models.conf)
-        self.anchor = GlobalConst(**self.models.anchor)
+        self.conf = ConfConst(**self.models.conf)
+        self.anchor = AnchorConst(**self.models.anchor)
 
 
 ###############################
@@ -62,8 +78,8 @@ class EnvConf(BaseModel):
     name: str = "default"
     log_maxlen: int = int(1e+5)
     type: Optional[str] = None
-    data_root: Union[str, list] = None
-    recipes_loc: Union[str, list] = None
+    recipes_root: Union[str, dict] = None
+    paths: Union[dict] = {}
 
 
 class PluginParams(BaseModel):
@@ -81,45 +97,51 @@ class ConfscadeDefaults(BaseModel):
 
 class FuncRecipe(BaseModel):
     function: str
-    args: Optional[list] = None
-    kwargs: Optional[dict] = None
+    args: Optional[list] = []
+    kwargs: Optional[dict] = {}
     fail_silently: bool = False
 
 
-class DataLoader(BaseModel):
-    loader: FuncRecipe
-    location: Optional[str] = None
-    filters: Optional[list] = None
-    columns: Optional[list] = None
-    process: Optional[Union[dict, list, str]] = None
-    use_data_root: bool = True
+class LoaderRecipe(FuncRecipe):
+    location: Union[str, dict]
+
+    @model_validator(mode="after")
+    def convert_to_func(self):
+        if type(self.location) is dict:
+            # TODO: Handle case where path is missing
+            loc = self.location["path"]
+        else:
+            loc = self.location
+
+        self.args.insert(0, loc)
+        return self
 
 
 class DataRecipe(BaseModel):
     backend: str = "pandas"
-    load: FuncRecipe
+    load: dict = {}
     metadata: dict = {}
-    process: Optional[Union[dict, list, str]] = None
+    process: Optional[Union[dict, list]] = None
     write: Optional[str] = None # think this always has to be a recipe name
 
 
 class LocationRecipe(BaseModel):
-    conf_type: Literal["location"]
-    use_root: Optional[Literal["data", "recipe"]] = None
+    recipe_type: Literal["location"]
+    use_path: Optional[str] = None
     path: str
     orig_path: Optional[str] = None
-    root_paths: Optional[dict] = None
+    paths: Optional[dict] = None
 
     @model_validator(mode="after")
     def resolve_path(self):
-        if not self.root_paths:
+        if not self.paths:
             return self
-        if self.use_root:
+        if self.use_path:
             self.orig_path = self.path
             try:
-                self.path = os.path.join(self.root_paths[self.use_root], self.path)
+                self.path = os.path.join(self.paths[self.use_path], self.path)
             except KeyError:
-                raise ValueError(f"root_path `{self.use_root}` not found in provided paths")
+                raise ValueError(f"root_path `{self.use_path}` not found in provided paths")
         return self
 
 
