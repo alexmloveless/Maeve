@@ -1,16 +1,17 @@
 {
 
     "TestLocation" : {
-        "conf_type" : "location",
-        "location" : "mypath/somewhere",
-        "use_root" : "data"
+        "recipe_type" : "location",
+        "path" : "spotify-2023-utf-8.csv",
+        "use_path" : "test_data"
     },
     "TestNoPipeline" : {
-        "type" : "data_access",
+        "recipe_type" : "data",
         "backend" : "pandas",
         "load" : {
-            "loader" : "file",
+            "function" : "read_csv",
             "location" : "@TestLocation",
+            "kwargs" : {"header" : 0}
         }
     },
 

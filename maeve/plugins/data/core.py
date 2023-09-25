@@ -1,10 +1,9 @@
 from maeve.util import FuncUtils
-from maeve.models.core import DataLoader, DataRecipe
+from maeve.models.core import DataRecipe, LoaderRecipe
 
 from pydantic import BaseModel
 from typing import get_type_hints, Optional, Union
 import importlib
-
 
 class Data:
     def __init__(self, session=None):
@@ -20,49 +19,23 @@ class Data:
     def get_backend(backend):
         return importlib.import_module(backend)
 
-    def stages(self, recipe, backend):
-        try:
-            loc = recipe.load.location
-        except AttributeError:
-            # complain
-            pass
-        # add loc to args then run run_func()
-        df = getattr(backend, recipe.load.loader)(
-            loc, *recipe.load.args, **recipe.load.kwargs
-        )
-        # need to adjust anchor utils so that it can handle "special" variables, the first being "location"
-        # which will have a "use_root" field that will be used to prepend the value
+    @staticmethod
+    def stages(recipe, backend):
+        load = LoaderRecipe(**recipe.load).model_dump()
+
         obj = FuncUtils.run_func(
-            recipe=recipe.load.loader
+            recipe=load,
+            ns=backend
         )
-        if recipe.load:
-            pass
+
         if recipe.process:
-            pass
+            obj = FuncUtils.run_pipeline(recipe.process, obj)
+
         if recipe.write:
+            # placeholder
             pass
 
-        return df
+        return obj
 
     def load(self, recipe):
-        pass
-
-class Loaders:
-    def __init__(self, recipe: BaseModel):
-        self.backend = recipe.load.backend
-
-    @classmethod
-    def load(cls, recipe):
-        return getattr(cls, recipe.load.loader)(recipe)
-
-    def loader(func):
-        # loader decorator that parses the model etc.
-        def inner(*args, **kwargs):
-            hints = get_type_hints(func) # possible routing dependent on args
-            return func(*args, **kwargs)
-        return inner
-
-    @loader
-    @staticmethod
-    def csv(recipe):
         pass

@@ -7,7 +7,3 @@ class PolarsDataFrame:
     def mangle_columns(self, df):
         df = df.rename({"track_name": "TESTING"})
         return df
-
-
-class PolarsLoaders:
-    pass
