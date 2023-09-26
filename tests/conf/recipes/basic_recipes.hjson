@@ -9,7 +9,7 @@
         "recipe_type" : "data",
         "backend" : "pandas",
         "load" : {
-            "function" : "read_csv",
+            "function" : "read_csv§",
             "location" : "@TestLocation",
             "kwargs" : {"header" : 0}
         }
