@@ -68,7 +68,7 @@ class Session:
         # use what's already in catalogue
         if use_from_catalogue:
             if self.c.has(recipe_name):
-                return self.c.get(recipe_name)
+                return self.c.get(recipe_name).obj
 
         try:
             plugin = recipe[self.g.conf.type_field]
