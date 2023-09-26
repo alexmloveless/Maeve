@@ -6,13 +6,14 @@ from maeve.catalogue import Catalogue, Register
 
 import re
 import importlib
-from typing import Union
+from typing import Union, Literal
 
 
 class Session:
     def __init__(self,
                  conf: Union[str, dict, list, tuple] = None,
-                 log_level: str = None
+                 log_level: str = None,
+                 log_location: str = Literal["stdout", "catalogue", "both"]
                  ):
         """
         Initialise a session
@@ -60,8 +61,13 @@ class Session:
              anchors: dict = None,
              catalogue_metadata: dict = None,
              return_obj: bool = True,
-             use_from_catalogue: bool = True
+             use_from_catalogue: bool = True,
+             reload_recipes=False
              ):
+
+        if reload_recipes:
+            self.get_recipes()
+
         recipe_name = recipe
         recipe = self.r.recipes.get(recipe, anchors=anchors)
 
