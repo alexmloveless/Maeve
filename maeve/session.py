@@ -3,7 +3,6 @@ from maeve.plugins import Plugins
 from maeve.models.core import Globals, OrgConf, EnvConf, PluginParams
 from maeve.conf import Confscade
 from maeve.catalogue import Catalogue, Register
-from maeve.plugins.data.extensions import DataFrame
 
 import re
 import importlib
@@ -37,14 +36,14 @@ class Session:
 
         self.log = self.c.add(
             Logger(log_level=log_level, log_maxlen=self.r.env.log_maxlen),
-            "session_log",
+            name="session_log",
             source=__name__,
             obj_type="maeve.util.Logger",
             description="The session log. Inspect object for methods for interrogating.",
             return_item=True
         )
         self.r.recipes = self.get_recipes()
-
+        self.recipes = self.r.recipes
 
     def get_recipes(self, loc: Union[str, list] = None):
         if not loc:
@@ -60,12 +59,16 @@ class Session:
              add_to_catalogue: bool = True,
              anchors: dict = None,
              catalogue_metadata: dict = None,
-             return_obj: bool = True
+             return_obj: bool = True,
+             use_from_catalogue: bool = True
              ):
         recipe_name = recipe
         recipe = self.r.recipes.get(recipe, anchors=anchors)
 
-        # TODO: options to use what's in catalogue
+        # use what's already in catalogue
+        if use_from_catalogue:
+            if self.c.has(recipe_name):
+                return self.c.get(recipe_name)
 
         try:
             plugin = recipe[self.g.conf.type_field]
@@ -82,6 +85,8 @@ class Session:
             cm["obj_type"] = cm.get("obj_type", str(type(obj)))
             cm["name"] = cm.get("name", recipe_name)
 
+            # for recipes with anchors we cannot guarantee that they are the same object
+            # so we err of the side of caution
             if anchors:
                 cm["protect"] = "increment"
             else:

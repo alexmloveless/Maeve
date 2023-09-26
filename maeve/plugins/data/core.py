@@ -19,14 +19,15 @@ class Data:
     def get_backend(backend):
         return importlib.import_module(backend)
 
-    @staticmethod
-    def stages(recipe, backend):
-        load = LoaderRecipe(**recipe.load).model_dump()
-
-        obj = FuncUtils.run_func(
-            recipe=load,
-            ns=backend
-        )
+    def stages(self, recipe, backend):
+        if recipe.load["function"] == "recipe":
+            obj = self.s.cook(recipe.load["recipe"], return_obj=True, use_from_catalogue=True)
+        else:
+            load = LoaderRecipe(**recipe.load).model_dump()
+            obj = FuncUtils.run_func(
+                recipe=load,
+                ns=backend
+            )
 
         if recipe.process:
             obj = FuncUtils.run_pipeline(recipe.process, obj)
