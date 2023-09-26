@@ -63,6 +63,17 @@ class Catalogue:
 
         return re.sub(r"\d+$", str(n + 1), name)
 
+    def has(self, name):
+        if name in self.obj.keys():
+            return True
+        else:
+            return False
+
+    def get(self, name):
+        try:
+            return self.obj[name]
+        except KeyError:
+            raise ValueError(f"No object named {name} in catalogue")
 
 class Register:
     def __init__(self):
