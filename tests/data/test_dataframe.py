@@ -1,12 +1,13 @@
 import unittest
+from maeve import Session
 
 class TestData(unittest.TestCase):
 
     def setUp(self):
-        self.csvfile = "./data/spotify-2023-utf-8.csv"
+        self.me = Session(conf="../tests/conf/basic_org_conf.hjson", log_level="DEBUG")
 
     def test_load_csv(self):
-        dfpd = None
+        df = self.me.cook("TestNoPipeline")
 
 
 if __name__ == '__main__':
