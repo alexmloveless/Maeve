@@ -1,14 +1,14 @@
-from maeve import Globals as g
+from maeve.models.core import Globals
 
 class Plugins:
-
+    g = Globals()
     __plugin_alias = {
         "data": "Data",
         "Data": "Data"
     }
 
     __plugin_map = {
-        "Data": (f"{g.packagename}.plugins.data.core", "Data")
+        "Data": (f"{g.core.package_name}.plugins.data.core", "Data")
     }
 
     @classmethod

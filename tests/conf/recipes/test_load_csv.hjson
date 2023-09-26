@@ -1,0 +1,30 @@
+{
+    "TestLoadCSVNoPipeline" : {
+        "recipe_type" : "data",
+        "backend" : "pandas",
+        "load" : {
+            "function" : "read_csv",
+            "location" : "@TestLocation",
+            "kwargs" : {"header" : 0}
+        }
+    },
+
+    "TestLoadCSVWithPipeline" : {
+        "inherits" : "TestLoadCSVNoPipeline",
+        "process" : {
+            "rename_column" : {
+                "function" : "rename",
+                "kwargs" : {
+                    "columns" : {
+                        "track_names" : "track"
+                    }
+                }
+            },
+            "filter_2023" : {
+                "function" : "query",
+                "args" : ["released_year == '2023'"]
+            }
+        }
+    }
+
+}
