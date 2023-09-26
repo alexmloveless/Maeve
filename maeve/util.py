@@ -347,14 +347,15 @@ class FuncUtils:
                 try:
                     func = getattr(ns, recipe.function)
                 except AttributeError:
-                    cls.handle_func_fail(recipe, f"No know func called {recipe.function}")
-            return cls._func(func, recipe, obj, logger)
+                    return cls.handle_func_fail(recipe, f"No known func called {recipe.function}", ret=obj)
+                return cls._func(func, recipe, obj, logger)
+            return cls._func(func, recipe, logger)
         else:
             try:
                 func = getattr(ns, recipe.function)
             except AttributeError:
                 cls.handle_func_fail(recipe, f"No know func called {recipe.function}")
-            return cls._func(func, recipe, obj, logger)
+            return cls._func(func, recipe, logger)
 
     @classmethod
     def _func(cls, func, recipe, obj=None, logger=None):
@@ -364,8 +365,7 @@ class FuncUtils:
             else:
                 return func(obj, *recipe.args, **recipe.kwargs)
         except Exception as e:
-            _ = cls.handle_func_fail(recipe, e, logger=logger)
-            return obj
+            return cls.handle_func_fail(recipe, e, logger=logger)
 
     @staticmethod
     def handle_func_fail(recipe, e, ret=None, logger=None):
@@ -381,10 +381,12 @@ class FuncUtils:
 
 
     @classmethod
-    def run_pipeline(cls, conf: Union[dict, list], obj=None):
-        if type(conf) is dict:
+    def run_pipeline(cls, recipes: Union[dict, list], obj=None):
+        if type(recipes) is dict:
             # keys are only there to help manage the order of funcs and facilitate merges
-            conf = conf.values()
+            recipes = recipes.values()
 
-        for f in conf:
-            obj = FuncUtils.run_func(obj, f)
+        for recipe in recipes:
+            obj = FuncUtils.run_func(recipe, obj)
+
+        return obj

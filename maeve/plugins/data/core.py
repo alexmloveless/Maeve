@@ -25,7 +25,7 @@ class Data:
         else:
             load = LoaderRecipe(**recipe.load).model_dump()
             obj = FuncUtils.run_func(
-                recipe=load,
+                load,
                 ns=backend
             )
 

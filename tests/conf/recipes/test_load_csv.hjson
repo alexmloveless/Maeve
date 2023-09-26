@@ -22,7 +22,7 @@
             },
             "filter_2023" : {
                 "function" : "query",
-                "args" : ["released_year == '2023'"]
+                "args" : ["released_year == 2023"]
             }
         }
     }
