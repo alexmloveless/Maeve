@@ -10,17 +10,23 @@ import hjson
 import pkg_resources
 from functools import reduce
 import operator
-from typing import Union, Optional
+from typing import Union, Literal
 from collections import deque
 from datetime import datetime
 import pandas as pd
 
 
 class Logger:
-    def __init__(self, log_level=None, log_maxlen=1e+5):
+    def __init__(
+            self,
+            log_level: str = None,
+            log_location: str = Literal["stdout", "catalogue", "both"],
+            log_maxlen: int = 1e+5
+    ):
         self.g = LogConst()
 
         log_level = log_level if log_level else self.g.default_level
+        self.loc = log_location
 
         self._levels = {v: level for level, v in enumerate(self.g.levels)}
         self.level = self._levels[log_level]
@@ -43,7 +49,13 @@ class Logger:
 
     def log(self, level, message, detail=None):
         if self._levels[level] >= self.level:
-            self.add_to_log(level, message, detail)
+
+            if self.loc is any(["catalogue", "both"]):
+                self.add_to_log(level, message, detail)
+
+            if self.loc is any(["stdout", "both"]):
+                print(f"{datetime.now()} {level} {message} {detail}")
+
 
     def add_to_log(self, level: str, source: str, message: str, detail: str = None):
         self._log.append({
@@ -59,6 +71,7 @@ class Logger:
             return pd.DataFrame.from_records(self._log)
         else:
             return self._log
+
 
 class DictUtils:
     g = GlobalConst()
@@ -265,15 +278,14 @@ class FSUtils:
 
 
 class AnchorUtils:
-
     ac = AnchorConst()
 
     @classmethod
     def resolve_anchors(cls,
-                cnf: dict,
-                obj: Union[list, dict],
-                env_conf,
-                anchors: dict = None) -> dict:
+                        cnf: dict,
+                        obj: Union[list, dict],
+                        env_conf,
+                        anchors: dict = None) -> dict:
         try:
             iterator = obj.items()
         except AttributeError:
@@ -378,7 +390,6 @@ class FuncUtils:
             return ret
         else:
             raise RuntimeError(message)
-
 
     @classmethod
     def run_pipeline(cls, recipes: Union[dict, list], obj=None):
