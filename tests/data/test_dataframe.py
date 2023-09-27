@@ -10,7 +10,6 @@ import sys
 
 @pytest.fixture
 def maeve_session(std_maeve_init_kwargs):
-    print(os.path.dirname(os.path.abspath(__file__)))
     return Session(**std_maeve_init_kwargs)
 
 
