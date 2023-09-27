@@ -6,14 +6,15 @@ from maeve.catalogue import Catalogue, Register
 
 import re
 import importlib
-from typing import Union, Literal
+from typing import Union, Literal, Optional
 
 
 class Session:
     def __init__(self,
                  conf: Union[str, dict, list, tuple] = None,
                  log_level: str = None,
-                 log_location: str = Literal["stdout", "catalogue", "both"]
+                 log_location: str = Literal["stdout", "catalogue", "both"],
+                 log_maxlen: Optional[int] = 1e+5
                  ):
         """
         Initialise a session
@@ -27,24 +28,30 @@ class Session:
             If a list or a tuple is passed this should be ???
         """
 
+        log = Logger(
+            log_level=log_level,
+            log_maxlen=log_maxlen,
+            log_location=log_location
+        )
+
         self.g = Globals()  # package level immutables
         self.c = Catalogue()  # the store of mutable shared objects and metadata
         self.r = Register()  # mutable shared variables e.g. recipes
 
-        self.r._org = Confscade(conf)
+        self.r._org = Confscade(conf, logger=log)
         self.r.org = OrgConf(**self.r._org.get("org"))
         self.r.env = EnvConf(**self.r._org.get("env"))
 
         self.log = self.c.add(
-            Logger(log_level=log_level, log_maxlen=self.r.env.log_maxlen),
+            log,
             name="session_log",
             source=__name__,
             obj_type="maeve.util.Logger",
             description="The session log. Inspect object for methods for interrogating.",
-            return_item=True
+            return_item=True,
         )
-        self.r.recipes = self.get_recipes()
-        self.recipes = self.r.recipes
+        self.recipes = None
+        self.get_recipes()
 
     def get_recipes(self, loc: Union[str, list] = None):
         if not loc:
@@ -53,7 +60,8 @@ class Session:
             else:
                 self.log.debug("No recipes locations found")
                 return None
-        return Confscade(loc, env_conf=self.r.env)
+        self.recipes = Confscade(loc, env_conf=self.r.env, logger=self.log)
+        self.r.recipes = self.recipes
 
     def cook(self,
              recipe,
@@ -69,7 +77,7 @@ class Session:
             self.get_recipes()
 
         recipe_name = recipe
-        recipe = self.r.recipes.get(recipe, anchors=anchors)
+        recipe = self.recipes.get(recipe, anchors=anchors, exceptonmissing=True)
 
         # use what's already in catalogue
         if use_from_catalogue:
@@ -79,7 +87,7 @@ class Session:
         try:
             plugin = recipe[self.g.conf.type_field]
         except KeyError:
-            raise ValueError(f"Cannot load a recipe without a '{self.g.conf.type_field} field'")
+            raise ValueError(f"Cannot load a recipe without a '{self.g.conf.type_field}' field")
 
         params = recipe.get(self.g.conf.init_params_field, {})
         name, method = self.parse_plugin_name(plugin)

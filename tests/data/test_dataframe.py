@@ -1,14 +1,15 @@
-import unittest
+import pytest
+from tests.global_fixtures import std_maeve_init_kwargs, basic_org_conf
 from maeve import Session
-
-class TestData(unittest.TestCase):
-
-    def setUp(self):
-        self.me = Session(conf="../tests/conf/basic_org_conf.hjson", log_level="DEBUG")
-
-    def test_load_csv(self):
-        df = self.me.cook("TestNoPipeline")
+import pandas as pd
+import os
 
 
-if __name__ == '__main__':
-    unittest.main()
+@pytest.fixture
+def maeve_session(std_maeve_init_kwargs):
+    return Session(**std_maeve_init_kwargs)
+
+
+def test_load_csv(maeve_session):
+    df = maeve_session.cook("TestLoadCSVNoPipeline")
+    assert type(df) is pd.core.frame.DataFrame

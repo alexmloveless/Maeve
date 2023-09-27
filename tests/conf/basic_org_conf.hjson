@@ -3,9 +3,9 @@
         "name" : "Maeve PLC."
     },
     "env" : {
-        "recipes_root" : "../tests/conf/recipes"
+        "recipes_root" : "../conf/recipes",
         "paths" : {
-            "test_data" : "../tests/data/data"
+            "test_data" : "data"
         }
     },
 }

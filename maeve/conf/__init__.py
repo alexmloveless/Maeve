@@ -21,6 +21,7 @@ class Confscade:
                  error_on_notfound: bool = None,
                  recursive_dir: bool = None,
                  log_level: str = None,
+                 logger=None
                  ):
         """
         Read and parse JSON config file
@@ -38,13 +39,19 @@ class Confscade:
             is returned with an empty conf dict. Conf items can then be added after the fact.
         log_level: str
             The log level,
+        logger: object
+            A logger instance - either a python or maeve logger instance should work
         """
         if env_conf:
             self.e = env_conf
         else:
             self.e = EnvConf()
 
-        self.log = Logger(log_level=log_level, log_maxlen=self.e.log_maxlen)
+        if logger:
+            self.log = logger
+        else:
+            self.log = Logger(log_level=log_level, log_maxlen=self.e.log_maxlen)
+
         self.g = GlobalConst()
 
         self.fs = FSUtils()
