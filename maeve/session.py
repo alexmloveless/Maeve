@@ -13,7 +13,7 @@ class Session:
     def __init__(self,
                  conf: Union[str, dict, list, tuple] = None,
                  log_level: str = None,
-                 log_location: str = Literal["stdout", "catalogue", "both"],
+                 log_location: str = "",
                  log_maxlen: Optional[int] = 1e+5
                  ):
         """

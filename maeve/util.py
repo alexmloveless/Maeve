@@ -20,11 +20,12 @@ class Logger:
     def __init__(
             self,
             log_level: str = None,
-            log_location: str = Literal["stdout", "catalogue", "both"],
+            log_location: str = None,
             log_maxlen: int = 1e+5
     ):
         self.g = LogConst()
 
+        log_location = log_location if log_location else "catalogue"
         log_level = log_level if log_level else self.g.default_level
         self.loc = log_location
 
@@ -328,6 +329,8 @@ class AnchorUtils:
 
     @classmethod
     def resolve_recipe(cls, recipe, env_conf):
+        if "recipe_type" not in recipe.keys():
+            return recipe
         if recipe["recipe_type"] == "location":
             return LocationRecipe(paths=env_conf.paths, **recipe).model_dump()
 

@@ -21,6 +21,7 @@ class Confscade:
                  error_on_notfound: bool = None,
                  recursive_dir: bool = None,
                  log_level: str = None,
+                 log_location: str = None,
                  logger=None
                  ):
         """
@@ -50,7 +51,7 @@ class Confscade:
         if logger:
             self.log = logger
         else:
-            self.log = Logger(log_level=log_level, log_maxlen=self.e.log_maxlen)
+            self.log = Logger(log_level=log_level, log_maxlen=self.e.log_maxlen, log_location=log_location)
 
         self.g = GlobalConst()
 
