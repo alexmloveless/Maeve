@@ -108,14 +108,23 @@ class Confscade:
 
     def get_conf(self, config: Optional[Union[list, dict, str]] = None):
         if config:
-            if type(config) is dict:
-                config = config.values()
-            elif type(config) is str:
-                # if not a valid JSON string returns the original string
-                cfg = self.load_json_string(config)
+            type_config = type(config)
+            if type_config is str:
+                try:
+                    self.conf = json.loads(config)
+                except (ValueError, TypeError):
+                    self.get_conf_from_files(config)
 
-            self.get_conf_from_files(config)
+            elif type_config in [dict, list]:
+                if type_config is dict:
+                    config = list(config.values())
+                self.get_conf_from_files(config)
+            else:
+                self.log.warning("Invalid data type, using global_default_conf")
+                self.conf = {}
+
         else:
+            self.log.warning("No config info provided, using global_default_conf")
             self.conf = {}
 
         # We add in a global default so that there's always something for cascading confs to roll up to
