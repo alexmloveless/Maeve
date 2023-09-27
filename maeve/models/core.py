@@ -1,7 +1,8 @@
-from pydantic import BaseModel, model_validator
+from pydantic import BaseModel, model_validator, Field
 from typing import Literal, Optional, Union
 
 import os
+from importlib import resources
 
 
 ###############################
@@ -12,6 +13,8 @@ import os
 class GlobalConst(BaseModel):
     package_name: str = "maeve"
     datapackagestub: str = "mv"
+    package_root: str = Field(default_factory=lambda: str(resources.files("maeve")))
+
 
     class Config:
         frozen = True
