@@ -1,4 +1,4 @@
-from maeve import Globals as g
+from maeve.models.core import Globals
 from .backends.pandas import PandasDataFrame
 from .backends.polars import PolarsDataFrame
 import pandas as pd
@@ -6,8 +6,11 @@ import polars as pl
 
 # TODO: Enable backends to be explictly enabled to minimise memory
 
-@pd.api.extensions.register_dataframe_accessor(g.datapackagestub)
-@pl.api.register_dataframe_namespace(g.datapackagestub)
+g = Globals()
+
+
+@pd.api.extensions.register_dataframe_accessor(g.core.datapackagestub)
+@pl.api.register_dataframe_namespace(g.core.datapackagestub)
 class DataFrame:
 
     def __init__(self, df):

@@ -47,15 +47,14 @@ class Logger:
     def critical(self, *args, **kwargs):
         self.log("CRITICAL", *args, **kwargs)
 
-    def log(self, level, message, detail=None):
+    def log(self, level, message, detail=''):
         if self._levels[level] >= self.level:
 
-            if self.loc is any(["catalogue", "both"]):
+            if self.loc in ["catalogue", "both"]:
                 self.add_to_log(level, message, detail)
 
-            if self.loc is any(["stdout", "both"]):
+            if self.loc in ["stdout", "both"]:
                 print(f"{datetime.now()} {level} {message} {detail}")
-
 
     def add_to_log(self, level: str, source: str, message: str, detail: str = None):
         self._log.append({
