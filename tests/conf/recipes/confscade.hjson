@@ -11,24 +11,33 @@
         "cs_anchor1_dict_1_k1" : "cs_anchor1_dict_1_k1"
     }
   },
+  "cs_anchor2" : {
+    "cs_anchor2_str1" : "cs_anchor2_str1"
+  }
   "cs_file_1" : {
-    "cs1_l1_str_1" : "v_l1_value_str_1",
-    "cs1_l1_int_1" : 1,
-    "cs1_l1_list_1" : ["cs1_l1_list_1_i1", "cs1_l1_list_1_i2", "cs1_l1_list_1_i3"],
-    "cs1_l1_dict_1" : {
-      "cs1_l2_dict_1" : {
-        "cs1_l2_dict_1_int_1" : 2
+    "cs_l1_str_1" : "v_l1_value_str_1",
+    "cs_l1_int_1" : 1,
+    "cs_l1_list_1" : ["cs_l1_list_1_i1", "cs_l1_list_1_i2", "cs_l1_list_1_i3"],
+    "cs_l1_dict_1" : {
+      "cs_l2_dict_1" : {
+        "cs_l2_dict_1_int_1" : 2
       }
     },
-    "cs1_l1_anchor1" : "@cs_anchor1"
+    "cs_l1_anchor1" : "@cs_anchor1"
   },
   "cs_file_1_inherits" : {
-    "inherits" : "cs1",
-    "cs1_l1_list_1" : ["cs_file_1_inherits_i1"]
-    "cs1_l1_dict_1": {
-      "cs1_l2_dict_1": {
-        "cs1_l2_dict_1_int_1": 3
+    "inherits" : "cs_file_1",
+    "cs_l1_str_1" : "v_l1_value_str_inherits",
+    "cs_l1_list_1" : ["cs_file_1_inherits_i4"]
+    "cs_l1_dict_1": {
+      "cs_l2_dict_1": {
+        "cs_l2_dict_1_int_1": 3
       }
     }
+    "cs_l1_anchor1" : "@cs_anchor2"
+  },
+  "cs_file_1_inherits_2" : {
+    "inherits" : "cs_file_1_inherits",
+    "cs_l1_list_1" : ["cs_file_1_inherits_2_i5"]
   }
 }
