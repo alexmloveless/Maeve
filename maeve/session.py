@@ -6,7 +6,7 @@ from maeve.catalogue import Catalogue, Register
 
 import re
 import importlib
-from typing import Union, Literal, Optional
+from typing import Union, Any, Optional
 
 
 class Session:
@@ -23,9 +23,21 @@ class Session:
         conf: str, dict, list , tuple
             If a string is passed it must be either a path to a valid config file,
             or a valid config string in one of the supported format (e.g. JSON, YAML)
-            If a dict is passed it will be directly as the global conf and all the
+            If a dict is passed it will be used directly as the global conf and all the
             same principles apply as any other conf
             If a list or a tuple is passed this should be ???
+        log_level: str
+            The log level to use as per the standard logging package
+            levels
+        log_location: str
+            Where to write log messages. This takes on of three arguments:
+            "catalogue" will write to a catalogue object from where it will
+            by accessible via the maeve.log object
+            "stdout" will write to stdout
+            "both" will write to both
+        log_maxlen: int
+            If logging to the catalogue, this will limit amount of events
+            logged via a deque.
         """
 
         log = Logger(
@@ -39,7 +51,9 @@ class Session:
         self.r = Register()  # mutable shared variables e.g. recipes
 
         self.r._org = Confscade(conf, logger=log)
+        # org level conf e.g. names, stles, colours etc.
         self.r.org = OrgConf(**self.r._org.get("org"))
+        # env level conf e.g. locations
         self.r.env = EnvConf(**self.r._org.get("env"))
 
         self.log = self.c.add(
@@ -51,9 +65,9 @@ class Session:
             return_item=True,
         )
         self.recipes = None
-        self.get_recipes()
+        self._get_recipes()
 
-    def get_recipes(self, loc: Union[str, list] = None):
+    def _get_recipes(self, loc: Union[str, list] = None):
         if not loc:
             if self.r.env.recipes_root:
                 loc = self.r.env.recipes_root
@@ -64,17 +78,52 @@ class Session:
         self.r.recipes = self.recipes
 
     def cook(self,
-             recipe,
+             recipe: str,
              add_to_catalogue: bool = True,
              anchors: dict = None,
              catalogue_metadata: dict = None,
              return_obj: bool = True,
              use_from_catalogue: bool = True,
-             reload_recipes=False
-             ):
+             reload_recipes: bool = False
+             ) -> Union[Any, None]:
+        """
+        Cooks (runs) a recipe and returns any results
+        Parameters
+        ----------
+        recipe: str
+            The name of recipe that exists in the recipes loaded
+        add_to_catalogue: bool
+            If True any objects returned as a result of cooking will be added to the catalogue
+        anchors: dict
+            If anchors are present in the recipe being cooked which are keys in this dict
+            then the corresponding value will replace the anchor. Where the same recipe name
+            exists both in this dict and in the current recipe book, those in this dict
+            will take precedence.
+        catalogue_metadata: dict
+            If the return object is being saved to the catalogue, then this dict
+            will be used for that object's metadata.
+        return_obj: bool
+            If True, the object created by cooking will be returned. Beware, that if
+            this is set to false, and `add_to_catalogue` is also False, then the object
+            will be lost. This is not an error since not all recipes will yield and object
+        use_from_catalogue: bool
+            If True, then cook will check the catalogue for objects with the same
+            name exist in the catalogue, and if so will return that. This can be helpful
+            when working with, for example, large base datasets that can be cached and used
+            by multiple dependant recipes. Beware: since catalogue items
+            are mutable, the object returned may not be exactly as you expect.
+            Default True.
+        reload_recipes: bool
+            if True will reload the entire recipe book before cooking. This is useful
+            if you're making changes to the stored recipes.
+        Returns
+        -------
+            Any objects returned by cooking the recipe
+
+        """
 
         if reload_recipes:
-            self.get_recipes()
+            self._get_recipes()
 
         recipe_name = recipe
         recipe = self.recipes.get(recipe, anchors=anchors, exceptonmissing=True)
