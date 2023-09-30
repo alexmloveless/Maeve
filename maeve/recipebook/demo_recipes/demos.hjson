@@ -1,0 +1,15 @@
+{
+    "YummyCSV" : {
+        "recipe_type" : "location",
+        "path" : "recipebook/demo_files/yummy.csv",
+        "use_path" : "_package_root"
+    },
+    "Yummy" : {
+        "recipe_type" : "data",
+        "backend" : "pandas",
+        "load" : {
+            "function" : "read_csv",
+            "location" : "@YummyCSV"
+        }
+    }
+}

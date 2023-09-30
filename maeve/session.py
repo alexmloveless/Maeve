@@ -1,4 +1,4 @@
-from maeve.util import Logger
+from maeve.util import Logger, DemoUtils
 from maeve.plugins import Plugins
 from maeve.models.core import Globals, OrgConf, EnvConf, PluginParams
 from maeve.conf import Confscade
@@ -74,6 +74,7 @@ class Session:
             else:
                 self.log.debug("No recipes locations found")
                 return None
+        loc = DemoUtils.add_demo_recipes(loc, self.r.env.load_demo_recipes)
         self.recipes = Confscade(loc, env_conf=self.r.env, logger=self.log)
         self.r.recipes = self.recipes
 

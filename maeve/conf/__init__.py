@@ -228,8 +228,15 @@ class Confscade:
         return json.dumps(item, indent=4)
 
 
-    def pretty_print_conf(self, name):
-        c = self.confscade(self.conf, name)
+    def pretty_print_conf(self,
+                          name,
+                          resolve=True,
+                          parse_anchors=True
+    ):
+        if resolve:
+            c = self.get(name, parse_anchors=parse_anchors)
+        else:
+            c = self.conf[name]
         return self.pretty_print(c)
 
     def str_date_time_now(self):
