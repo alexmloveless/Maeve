@@ -9,12 +9,31 @@ from importlib import resources
 #  Constants
 ###############################
 
+class PackageInfo:
+    def __init__(self):
+        self._package_root = str(resources.files("maeve"))
+        self._demo_recipes_root = os.path.join(self._package_root, "recipebook/demo_recipes/")
+
+    @property
+    def package_root(self):
+        return self._package_root
+
+    @property
+    def demo_recipes_root(self):
+        return self._demo_recipes_root
+
+
+_pinfo = PackageInfo()
+
 
 class GlobalConst(BaseModel):
     package_name: str = "maeve"
     datapackagestub: str = "mv"
-    package_root: str = Field(default_factory=lambda: str(resources.files("maeve")))
-
+    package_root: str = Field(_pinfo.package_root)
+    package_paths: dict = {
+        "_package_root": _pinfo.package_root,
+        "_demo_recipes_root" : _pinfo.demo_recipes_root
+    }
 
     class Config:
         frozen = True
@@ -83,6 +102,7 @@ class EnvConf(BaseModel):
     type: Optional[str] = None
     recipes_root: Union[str, dict] = None
     paths: Union[dict] = {}
+    load_demo_recipes: bool = True
 
 
 class PluginParams(BaseModel):
@@ -137,14 +157,19 @@ class LocationRecipe(BaseModel):
 
     @model_validator(mode="after")
     def resolve_path(self):
+        g = GlobalConst()
         if not self.paths:
             return self
+        self.orig_path = self.path
         if self.use_path:
-            self.orig_path = self.path
-            try:
-                self.path = os.path.join(self.paths[self.use_path], self.path)
-            except KeyError:
-                raise ValueError(f"root_path `{self.use_path}` not found in provided paths")
+            if self.use_path in g.package_paths.keys():
+                new_path = g.package_paths[self.use_path]
+            else:
+                try:
+                    new_path = self.paths[self.use_path]
+                except KeyError:
+                    raise ValueError(f"root_path `{self.use_path}` not found in provided paths")
+            self.path = os.path.join(new_path, self.path)
         return self
 
 

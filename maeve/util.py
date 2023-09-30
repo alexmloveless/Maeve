@@ -14,6 +14,7 @@ from collections import deque
 from datetime import datetime
 import pandas as pd
 
+g = GlobalConst()
 
 class Logger:
     def __init__(
@@ -73,7 +74,6 @@ class Logger:
 
 
 class DictUtils:
-    g = GlobalConst()
 
     @classmethod
     def __mg(cls, a, b):
@@ -180,7 +180,6 @@ class DictUtils:
 
 
 class FSUtils:
-    g = GlobalConst()
 
     @staticmethod
     def os_walk_and_filter(loc, dirregex: str = None, fileregex: str = None):
@@ -393,3 +392,24 @@ class FuncUtils:
             obj = FuncUtils.run_func(recipe, obj)
 
         return obj
+
+class DemoUtils:
+    @classmethod
+    def add_demo_recipes(cls,
+            loc: Union[list, dict, str],
+            load_demo_recipes: bool
+    ):
+        if not load_demo_recipes:
+            return loc
+
+        d_root = g.package_paths["_demo_recipes_root"]
+
+        if type(loc) is str:
+            return [loc, d_root]
+        elif type(loc) is list:
+            loc.append(d_root)
+            return loc
+        elif type(loc) is dict:
+            loc["demo_recipes"] = d_root
+        else:
+            return loc
