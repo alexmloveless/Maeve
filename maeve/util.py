@@ -7,7 +7,6 @@ from os import path, walk
 import re
 import json
 import hjson
-import pkg_resources
 from functools import reduce
 import operator
 from typing import Union, Literal
@@ -266,15 +265,6 @@ class FSUtils:
                 return hjson.load(fh, object_pairs_hook=dict)
         except hjson.scanner.HjsonDecodeError:
             raise TypeError(f"Invalid or malformed HJSON in file {f}")
-
-    @classmethod
-    def __list_package_dir(cls, item):
-        for i in pkg_resources.resource_listdir(cls.g.package_name, item):
-            new_item = item + "/" + i
-            if pkg_resources.resource_isdir(cls.g.package_name, new_item):
-                yield cls.__list_package_dir(i)
-            else:
-                yield new_item
 
 
 class AnchorUtils:

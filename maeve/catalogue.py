@@ -77,4 +77,6 @@ class Catalogue:
 
 class Register:
     def __init__(self):
-        pass
+        self.env = None
+        self._org = None
+        self.org = None
