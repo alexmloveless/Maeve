@@ -1,0 +1,12 @@
+{
+    "TestCSVUTF8Location" : {
+        "recipe_type" : "location",
+        "path" : "spotify-2023-utf-8.csv",
+        "use_path" : "test_data"
+    },
+    "TestParquetSingleLocation" : {
+        "recipe_type" : "location",
+        "path" : "spotify-2023.parquet",
+        "use_path" : "test_data"
+    }
+}

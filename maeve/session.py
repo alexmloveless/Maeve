@@ -85,7 +85,9 @@ class Session:
              catalogue_metadata: dict = None,
              return_obj: bool = True,
              use_from_catalogue: bool = True,
-             reload_recipes: bool = False
+             reload_recipes: bool = False,
+             *args,
+             **kwargs
              ) -> Union[Any, None]:
         """
         Cooks (runs) a recipe and returns any results
@@ -117,6 +119,9 @@ class Session:
         reload_recipes: bool
             if True will reload the entire recipe book before cooking. This is useful
             if you're making changes to the stored recipes.
+        *args, **kwargs:
+            Any additional args and kwargs will be passed directly to the
+            plugin method being run. See docs for plugin for details
         Returns
         -------
             Any objects returned by cooking the recipe
@@ -142,7 +147,7 @@ class Session:
         params = recipe.get(self.g.conf.init_params_field, {})
         name, method = self.parse_plugin_name(plugin)
         mod = self.init_plugin(name, params)
-        obj = self.run_plugin(mod, recipe, method=method)
+        obj = self.run_plugin(mod, recipe, method=method, *args, **kwargs)
         if add_to_catalogue:
             cm = catalogue_metadata if catalogue_metadata else {}
             cm["source"] = cm.get("source", plugin)
@@ -170,10 +175,10 @@ class Session:
         params = PluginParams(**params)
         return self.find_plugin(plugin)(self, *params.class_args, **params.class_kwargs)
 
-    def run_plugin(self, mod, recipe, method: str = None):
+    def run_plugin(self, mod, recipe, method: str = None, *args, **kwargs):
         if not method:
             method = self.g.conf.plugin_default_entrypoint
-        return getattr(mod, method)(recipe)
+        return getattr(mod, method)(recipe, *args, **kwargs)
 
     def parse_plugin_name(self, name):
         parts = re.split(self.g.conf.plugin_delim, name)

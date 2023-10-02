@@ -1,19 +1,30 @@
 from maeve.util import FuncUtils
 from maeve.models.core import DataRecipe, LoaderRecipe
 
-from pydantic import BaseModel
-from typing import get_type_hints, Optional, Union
 import importlib
+
+from typing import Optional
 
 class Data:
     def __init__(self, session=None):
         self.s = session
 
-    def main(self, recipe: dict):
+    def load(self, recipe: dict):
         recipe = DataRecipe(**recipe)
         backend = Data.get_backend(recipe.backend)
         obj = self.stages(recipe, backend)
         return obj
+
+    # an alias so that we have the standard plugin interface method
+    main = load
+
+    def query_parquet(
+        self,
+        recipe: dict,
+        columns: Optional[list] = None,
+        filters: Optional[list] = None
+    ):
+        pass
 
     @staticmethod
     def get_backend(backend):
@@ -21,7 +32,11 @@ class Data:
 
     def stages(self, recipe, backend):
         if recipe.load["function"] == "recipe":
-            obj = self.s.cook(recipe.load["recipe"], return_obj=True, use_from_catalogue=True)
+            obj = self.s.cook(
+                recipe.load["recipe"],
+                return_obj=True,
+                use_from_catalogue=True
+            )
         else:
             load = LoaderRecipe(**recipe.load).model_dump()
             obj = FuncUtils.run_func(
@@ -37,6 +52,3 @@ class Data:
             pass
 
         return obj
-
-    def load(self, recipe):
-        pass

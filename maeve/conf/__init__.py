@@ -223,10 +223,8 @@ class Confscade:
         else:
             return DictUtils.search_dict(self.confscade(self.conf, name), key)
 
-
     def pretty_print(self, item):
         return json.dumps(item, indent=4)
-
 
     def pretty_print_conf(self,
                           name,

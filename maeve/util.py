@@ -1,6 +1,7 @@
 from maeve.models.core import (
     GlobalConst, AnchorConst, FuncRecipe, LogConst, LocationRecipe
 )
+from maeve.plugins.primitives import Primitives
 
 import copy
 from os import path, walk
@@ -322,6 +323,8 @@ class AnchorUtils:
             return recipe
         if recipe["recipe_type"] == "location":
             return LocationRecipe(paths=env_conf.paths, **recipe).model_dump()
+        if recipe["recipe_type"] in ["dict", "list"]:
+            return Primitives.primitive(recipe)
 
 
 class FuncUtils:

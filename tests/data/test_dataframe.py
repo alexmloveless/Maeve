@@ -2,17 +2,15 @@ import pytest
 from tests.global_fixtures import std_maeve_init_kwargs
 from maeve import Session
 import pandas as pd
-import os
-import sys
 
 
+def test_load_csv(std_maeve_init_kwargs):
+    s = Session(**std_maeve_init_kwargs)
+    df = s.cook("TestLoadCSVNoPipeline")
+    assert type(df) is pd.core.frame.DataFrame
 
 
-@pytest.fixture
-def maeve_session(std_maeve_init_kwargs):
-    return Session(**std_maeve_init_kwargs)
-
-
-def test_load_csv(maeve_session):
-    df = maeve_session.cook("TestLoadCSVNoPipeline")
+def test_load_parquet(std_maeve_init_kwargs):
+    s = Session(**std_maeve_init_kwargs)
+    df = s.cook("TestPandasLoadParquet")
     assert type(df) is pd.core.frame.DataFrame

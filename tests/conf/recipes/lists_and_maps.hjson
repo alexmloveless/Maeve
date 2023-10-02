@@ -1,0 +1,11 @@
+{
+    "TestSpotifyColumnsMin" : {
+        "recipe_type" : "list",
+        "value" : ['track_name', 'artist_count', 'released_year',
+                        'released_month', 'released_day', 'streams']
+    },
+    "TestSpotifyFiltersMin" : {
+        "recipe_type" : "list",
+        "value" : ["released_year == 2023"]
+    }
+}

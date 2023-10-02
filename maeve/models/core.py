@@ -173,6 +173,7 @@ class LocationRecipe(BaseModel):
         return self
 
 
+
 ###############################
 #  Model Meta
 ###############################
