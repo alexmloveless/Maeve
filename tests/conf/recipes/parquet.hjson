@@ -1,0 +1,12 @@
+{
+    "TestPandasLoadParquet" : {
+        "recipe_type" : "data",
+        "backend" : "pandas",
+        "load" : {
+            "function" : "read_parquet",
+            "location" : "@TestParquetSingleLocation",
+            "columns" : "@TestSpotifyColumnsMin",
+            "filters" : "@TestSpotifyFiltersMin"
+        }
+    }
+}

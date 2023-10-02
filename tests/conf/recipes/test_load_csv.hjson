@@ -4,7 +4,7 @@
         "backend" : "pandas",
         "load" : {
             "function" : "read_csv",
-            "location" : "@TestLocation",
+            "location" : "@TestCSVUTF8Location",
             "kwargs" : {"header" : 0}
         }
     },

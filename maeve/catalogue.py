@@ -75,6 +75,7 @@ class Catalogue:
         except KeyError:
             raise ValueError(f"No object named {name} in catalogue")
 
+
 class Register:
     def __init__(self):
         self.env = None

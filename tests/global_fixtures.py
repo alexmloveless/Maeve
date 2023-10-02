@@ -1,5 +1,6 @@
 import pytest
 from maeve.models.core import GlobalConst
+from maeve import Session
 import json
 
 g = GlobalConst()
@@ -34,5 +35,6 @@ def std_maeve_init_kwargs():
 
 
 pytest_plugins = [
-    "std_maeve_init_kwargs"
+    "basic_org_conf",
+    "std_maeve_init_kwargs",
 ]
