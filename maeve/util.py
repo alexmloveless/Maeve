@@ -3,6 +3,7 @@ from maeve.models.core import (
 )
 from maeve.plugins.primitives import Primitives
 
+
 import copy
 from os import path, walk
 import re
@@ -26,7 +27,7 @@ class Logger:
     ):
         self.g = LogConst()
 
-        log_location = log_location if log_location else "catalogue"
+        log_location = log_location if log_location else self.g.defualt_loc
         log_level = log_level if log_level else self.g.default_level
         self.loc = log_location
 
@@ -179,6 +180,29 @@ class DictUtils:
     def deep_dict(d: dict, path: list):
         return reduce(operator.getitem, path, d)
 
+    @classmethod
+    def order_dicts(
+            cls,
+            d: dict,
+            log: Logger = None
+    ) -> dict:
+        log = log if log else Logger()
+        if not type(d) == dict:
+            log.warning(f"Expected dict but got {type(d)}")
+
+        for k, v in d.items():
+            if type(v) is dict:
+                if "order_by" in v.keys():
+                    if type(v["order_by"]) is list:
+                        try:
+                            d[k] = {k: v[k] for k in v["order_by"]}
+                        except KeyError:
+                            log.warning("List passed in order_by hay values not in the keys of the dict")
+                    elif type(v["order_by"]) is str:
+                        if v["order_by"] == "sort":
+                            v = {k: d[k] for k in sorted(v["order_by"].keys())}
+                v = cls.order_dicts(v)
+        return d
 
 class FSUtils:
 
@@ -267,15 +291,18 @@ class FSUtils:
             raise TypeError(f"Invalid or malformed HJSON in file {f}")
 
 
+
 class AnchorUtils:
     ac = AnchorConst()
 
     @classmethod
     def resolve_anchors(cls,
-                        cnf: dict,
+                        cnf,  # Should be a confscade obj but a dict will actually work, but with limited recursion
                         obj: Union[list, dict],
                         env_conf,
                         anchors: dict = None) -> dict:
+
+        # handle both dicts and lists
         try:
             iterator = obj.items()
         except AttributeError:
@@ -294,7 +321,7 @@ class AnchorUtils:
                         new_val = anchors[identifier]
                     else:
                         # grab a nested object
-                        sub_conf = cnf.get(identifier)
+                        sub_conf = cnf.get(identifier)  # fully resolves the anchor incl. inheritance and nested anchors
                         if keys:
                             new_val = DictUtils.deep_dict(sub_conf, keys)
                         else:

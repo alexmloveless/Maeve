@@ -1,0 +1,62 @@
+{
+  "TestPipeline1" : {
+    "recipe_type" : "pipeline",
+    "pipeline" : {
+      "s1": {
+        "function": "f1",
+        "args": [
+          "a",
+          "b"
+        ],
+        "kwargs": {
+          "k1": "v1",
+          "k2": "v2",
+          "k3": "v3"
+        }
+      },
+      "s2": {
+        "function": "f2",
+        "args": [
+          "d",
+          "e"
+        ],
+        "kwargs": {
+          "k4": "v4",
+          "k5": "v5",
+          "k6": "v6"
+        }
+      },
+      "s3": {
+        "function": "f3",
+        "args": [
+          "f",
+          "g"
+        ],
+        "kwargs": {
+          "k7": "v7",
+          "k8": "v8",
+          "k9": "v9"
+        }
+      }
+    }
+  },
+  "TestPipeline2" : {
+    "inherits" : "TestPipeline1",
+    "recipe_type": "pipeline",
+    "pipeline": {
+      "order_by" : ["s1", "s2", "s4", "s3"],
+      "s4": {
+        "function": "f4",
+        "args": [
+          "h",
+          "i"
+        ],
+        "kwargs": {
+          "k10": "v10",
+          "k11": "v11",
+          "k12": "v12"
+        }
+      }
+    }
+  }
+}

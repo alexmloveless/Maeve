@@ -51,7 +51,7 @@ class Session:
         self.r = Register()  # mutable shared variables e.g. recipes
 
         self.r._org = Confscade(conf, logger=log)
-        # org level conf e.g. names, stles, colours etc.
+        # org level conf e.g. names, styles, colours etc.
         self.r.org = OrgConf(**self.r._org.get("org"))
         # env level conf e.g. locations
         self.r.env = EnvConf(**self.r._org.get("env"))
@@ -73,7 +73,6 @@ class Session:
                 loc = self.r.env.recipes_root
             else:
                 self.log.debug("No recipes locations found")
-                return None
         loc = DemoUtils.add_demo_recipes(loc, self.r.env.load_demo_recipes)
         self.recipes = Confscade(loc, env_conf=self.r.env, logger=self.log)
         self.r.recipes = self.recipes

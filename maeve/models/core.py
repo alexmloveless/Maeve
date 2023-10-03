@@ -65,6 +65,7 @@ class AnchorConst(BaseModel):
 class LogConst(BaseModel):
     levels: list = ["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]
     default_level: str = "WARNING"
+    defualt_loc: str = "stdout"
     timestamp_label: str = "Timestamp"
     level_label: str = "Level"
     source_label: str = "Source"

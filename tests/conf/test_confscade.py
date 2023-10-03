@@ -1,5 +1,8 @@
 import pytest
-from tests.conf.recipes_fixtures import confscade_obj_base_test
+from tests.conf.recipes_fixtures import (
+    confscade_obj_base_test,
+    confscade_obj_pipeline_test
+)
 
 
 def test_cs_default(confscade_obj_base_test):
@@ -33,6 +36,19 @@ def test_cs_inherits_anchor_overwrite(confscade_obj_base_test):
     assert c["cs_l1_anchor1"]["cs_anchor2_str1"] == "cs_anchor2_str1"
 
 
+def test_cs_inherits_anchor_in_anchor(confscade_obj_base_test):
+    # anchor two replaces anchor one and is resolved in its place
+    c = confscade_obj_base_test.get("cs_file_1_inherits")
+    assert c["cs_l1_anchor1"]["cs_anchor2_anchor1"]["cs_anchor3_str1"] == "cs_anchor3_str1"
+
+
 def test_cs_inherits_2_list_append(confscade_obj_base_test):
     c = confscade_obj_base_test.get("cs_file_1_inherits_2")
     assert c["cs_l1_list_1"][4] == "cs_file_1_inherits_2_i5"
+
+
+def test_pipeline_order_by(confscade_obj_pipeline_test):
+    d = confscade_obj_pipeline_test.conf["TestPipeline2"]["pipeline"]["order_by"]
+    c = confscade_obj_pipeline_test.get("TestPipeline2")
+    l = list(c["pipeline"].keys())
+    assert l == d
