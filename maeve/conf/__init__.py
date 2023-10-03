@@ -78,6 +78,7 @@ class Confscade:
             inherits: dict = None,
             exceptonmissing: bool = False,
             parse_anchors: bool = True,
+            parse_directives: bool = True,
             anchors: dict = None
             ) -> dict:
         """
@@ -100,9 +101,12 @@ class Confscade:
         """
         d = self.confscade(self.conf, name, inherits=inherits, exceptonmissing=exceptonmissing)
         if parse_anchors:
-            return AnchorUtils.resolve_anchors(self.conf, d, anchors=anchors, env_conf=self.e)
-        else:
-            return d
+            d = AnchorUtils.resolve_anchors(self, d, anchors=anchors, env_conf=self.e)
+
+        if parse_directives:
+            # currently only parsing dict order_by
+            d = DictUtils.order_dicts(d, log=self.log)
+        return d
 
     def items(self):
         return list(self.conf.keys())
@@ -176,10 +180,8 @@ class Confscade:
 
         default = c.get(self.d.DEFAULT_CONF_KEY, {})
 
-        if not default:
-            self.log.debug("No default key or empty dict found in file {}".format(f))
-        else:
-            # The whole file is ignored if ignore=True is set int he default section
+        if default:
+            # The whole file is ignored if ignore=True is set in the default section
             if default.get("ignore", False):
                 return {}
 

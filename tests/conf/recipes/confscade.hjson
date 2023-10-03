@@ -12,8 +12,12 @@
     }
   },
   "cs_anchor2" : {
-    "cs_anchor2_str1" : "cs_anchor2_str1"
-  }
+    "cs_anchor2_str1" : "cs_anchor2_str1",
+    "cs_anchor2_anchor1" : "@cs_anchor3",
+  },
+  "cs_anchor3" : {
+    "cs_anchor3_str1" : "cs_anchor3_str1",
+  },
   "cs_file_1" : {
     "cs_l1_str_1" : "v_l1_value_str_1",
     "cs_l1_int_1" : 1,
