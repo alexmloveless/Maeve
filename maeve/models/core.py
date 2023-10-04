@@ -186,8 +186,10 @@ class PipelineRecipe(BaseModel):
 class ModelInfo:
 
     _alias_map = {
-        "location": LocationRecipe
+        "location": LocationRecipe,
+        "pipeline": PipelineRecipe
     }
+
     @classmethod
     def model_alias(cls, alias):
         return cls._alias_map[alias]
