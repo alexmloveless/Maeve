@@ -4,6 +4,7 @@ from maeve.models.core import Globals, OrgConf, EnvConf, PluginParams
 from maeve.conf import Confscade
 from maeve.catalogue import Catalogue, Register
 
+import importlib.metadata
 import re
 import importlib
 from typing import Union, Any, Optional
@@ -39,6 +40,8 @@ class Session:
             If logging to the catalogue, this will limit amount of events
             logged via a deque.
         """
+
+        self.__version__ = importlib.metadata.version('maeve')
 
         log = Logger(
             log_level=log_level,
