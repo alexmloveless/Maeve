@@ -145,8 +145,8 @@ class DataRecipe(BaseModel):
     backend: str = "pandas"
     load: dict = {}
     metadata: dict = {}
-    process: Optional[Union[dict, list]] = None
-    write: Optional[str] = None # think this always has to be a recipe name
+    process: Optional[Union[dict, list, str]] = None
+    write: Optional[str] = None  # think this always has to be a recipe name
 
 
 class LocationRecipe(BaseModel):
@@ -173,6 +173,10 @@ class LocationRecipe(BaseModel):
             self.path = os.path.join(new_path, self.path)
         return self
 
+
+class PipelineRecipe(BaseModel):
+    recipe_type: Literal["pipeline"]
+    pipeline: Union[dict, list]
 
 
 ###############################

@@ -9,7 +9,7 @@ confscade_tests_paths_ = [
     recipes_root + "/confscade.hjson"
 ]
 
-confscade_tests_pipeline_recipes = recipes_root + "/pipelines.hjson"
+confscade_tests_pipeline_recipes = recipes_root + "/confscade_pipelines.hjson"
 
 @pytest.fixture
 def confscade_test_paths():

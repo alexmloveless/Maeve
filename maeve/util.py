@@ -1,8 +1,10 @@
 from maeve.models.core import (
-    GlobalConst, AnchorConst, FuncRecipe, LogConst, LocationRecipe
+    GlobalConst, AnchorConst, FuncRecipe, LogConst,
+    LocationRecipe, PipelineRecipe
 )
 from maeve.plugins.primitives import Primitives
 
+from pydantic import ValidationError
 
 import copy
 from os import path, walk
@@ -350,6 +352,8 @@ class AnchorUtils:
             return recipe
         if recipe["recipe_type"] == "location":
             return LocationRecipe(paths=env_conf.paths, **recipe).model_dump()
+        if recipe["recipe_type"] == "pipeline":
+            return PipelineRecipe(**recipe).model_dump()
         if recipe["recipe_type"] in ["dict", "list"]:
             return Primitives.primitive(recipe)
 
@@ -414,6 +418,12 @@ class FuncUtils:
 
     @classmethod
     def run_pipeline(cls, recipes: Union[dict, list], obj=None):
+        try:
+            PipelineRecipe(**recipes)
+            recipes = recipes["pipeline"]
+        except ValidationError:
+            pass
+
         if type(recipes) is dict:
             # keys are only there to help manage the order of funcs and facilitate merges
             recipes = recipes.values()
@@ -422,6 +432,7 @@ class FuncUtils:
             obj = FuncUtils.run_func(recipe, obj)
 
         return obj
+
 
 class DemoUtils:
     @classmethod

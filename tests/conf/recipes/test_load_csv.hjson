@@ -9,14 +9,18 @@
         }
     },
 
-    "TestLoadCSVWithPipeline" : {
+    ####################################################
+    #  Pipelines
+    ####################################################
+
+    "TestLoadCSVWithInlinePipeline" : {
         "inherits" : "TestLoadCSVNoPipeline",
         "process" : {
             "rename_column" : {
                 "function" : "rename",
                 "kwargs" : {
                     "columns" : {
-                        "track_names" : "track"
+                        "track_name" : "dummy"
                     }
                 }
             },
@@ -25,6 +29,29 @@
                 "args" : ["released_year == 2023"]
             }
         }
+    },
+
+    "TestSimplePipeline" : {
+        "recipe_type" : "pipeline",
+        "pipeline" : {
+            "rename_column" : {
+                "function" : "rename",
+                "kwargs" : {
+                    "columns" : {
+                        "track_name" : "dummy"
+                    }
+                }
+            },
+            "filter_2023" : {
+                "function" : "query",
+                "args" : ["released_year == 2023"]
+            }
+        }
+    }
+
+    "TestLoadCSVWithAnchoredPipeline" : {
+        "inherits" : "TestLoadCSVNoPipeline",
+        "process" : "@TestSimplePipeline"
     }
 
 }
