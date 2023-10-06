@@ -1,10 +1,10 @@
 {
     "TestPandasLoadParquet" : {
-        "recipe_type" : "data",
+        "recipe_type" : "data_loader",
         "backend" : "pandas",
-        "load" : {
-            "function" : "read_parquet",
-            "location" : "@TestParquetSingleLocation",
+        "function" : "read_parquet",
+        "location" : "@TestParquetSingleLocation",
+        "kwargs" : {
             "columns" : "@TestSpotifyColumnsMin",
             "filters" : "@TestSpotifyFiltersMin"
         }

@@ -3,7 +3,7 @@ class Primitives:
         self.s = session
 
     @staticmethod
-    def primitive(recipe):
+    def primitive(recipe, obj=None):
         try:
             return recipe["value"]
         except KeyError:

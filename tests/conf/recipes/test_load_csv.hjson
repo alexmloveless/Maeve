@@ -1,57 +1,35 @@
 {
+
     "TestLoadCSVNoPipeline" : {
-        "recipe_type" : "data",
-        "backend" : "pandas",
-        "load" : {
-            "function" : "read_csv",
-            "location" : "@TestCSVUTF8Location",
-            "kwargs" : {"header" : 0}
-        }
+        "recipe_type" : "pipeline",
+        "pipeline" : [
+            {
+                "recipe_type" : "data_loader",
+                "backend" : "pandas",
+                "function" : "read_csv",
+                "location" : "@TestCSVUTF8Location",
+            }
+        ]
     },
 
-    ####################################################
-    #  Pipelines
-    ####################################################
 
     "TestLoadCSVWithInlinePipeline" : {
-        "inherits" : "TestLoadCSVNoPipeline",
-        "process" : {
-            "rename_column" : {
-                "function" : "rename",
-                "kwargs" : {
-                    "columns" : {
-                        "track_name" : "dummy"
-                    }
-                }
-            },
-            "filter_2023" : {
-                "function" : "query",
-                "args" : ["released_year == 2023"]
-            }
-        }
-    },
-
-    "TestSimplePipeline" : {
         "recipe_type" : "pipeline",
-        "pipeline" : {
-            "rename_column" : {
+        "pipeline" : [
+            {
+                "recipe_type" : "data_loader",
+                "backend" : "pandas",
+                "function" : "read_csv",
+                "location" : "@TestCSVUTF8Location",
+            },
+            {
                 "function" : "rename",
                 "kwargs" : {
                     "columns" : {
                         "track_name" : "dummy"
                     }
                 }
-            },
-            "filter_2023" : {
-                "function" : "query",
-                "args" : ["released_year == 2023"]
             }
-        }
+        ]
     }
-
-    "TestLoadCSVWithAnchoredPipeline" : {
-        "inherits" : "TestLoadCSVNoPipeline",
-        "process" : "@TestSimplePipeline"
-    }
-
 }

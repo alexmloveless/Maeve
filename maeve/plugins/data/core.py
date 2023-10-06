@@ -1,9 +1,10 @@
 from maeve.util import FuncUtils
-from maeve.models.core import DataRecipe, LoaderRecipe
+from maeve.models.core import DataRecipe, DataLoaderRecipe
 
 import importlib
 
 from typing import Optional
+
 
 class Data:
     def __init__(self, session=None):
@@ -38,7 +39,7 @@ class Data:
                 use_from_catalogue=True
             )
         else:
-            load = LoaderRecipe(**recipe.load).model_dump()
+            load = DataLoaderRecipe(**recipe.load).model_dump()
             obj = FuncUtils.run_func(
                 load,
                 ns=backend
