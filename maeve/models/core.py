@@ -1,8 +1,11 @@
-from pydantic import BaseModel, model_validator, Field
-from typing import Literal, Optional, Union
+from __future__ import annotations
+from pydantic import BaseModel, model_validator, Field, ValidationError
+from typing import Literal, Optional, Union, Dict, List
 
 import os
 from importlib import resources
+
+import maeve.util
 
 
 ###############################
@@ -119,15 +122,19 @@ class ConfscadeDefaults(BaseModel):
     ERROR_ON_NOTFOUND: Optional[bool] = False
     OUTPUT_DATETIME_FMT: Optional[str] = "%Y-%m-%d %H:%M:%S"
 
+
 class FuncRecipe(BaseModel):
+    recipe_type: Optional[Union[Literal["function"], Literal["data_loader"]]] = "function"
     function: str
     args: Optional[list] = []
     kwargs: Optional[dict] = {}
     fail_silently: bool = False
 
 
-class LoaderRecipe(FuncRecipe):
+class DataLoaderRecipe(FuncRecipe):
+    recipe_type: Literal["data_loader"] = "data_loader"
     location: Union[str, dict]
+    backend: str = "pandas"
 
     @model_validator(mode="after")
     def convert_to_func(self):
@@ -150,7 +157,7 @@ class DataRecipe(BaseModel):
 
 
 class LocationRecipe(BaseModel):
-    recipe_type: Literal["location"]
+    recipe_type: Literal["location"] = "location"
     use_path: Optional[str] = None
     path: str
     orig_path: Optional[str] = None
@@ -175,8 +182,11 @@ class LocationRecipe(BaseModel):
 
 
 class PipelineRecipe(BaseModel):
-    recipe_type: Literal["pipeline"]
-    pipeline: Union[dict, list]
+    recipe_type: Literal["pipeline"] = "pipeline"
+    # pipeline: Union[dict[str, Union[PipelineRecipe, DataLoaderRecipe, FuncRecipe]],
+    #                 list[Union[PipelineRecipe, DataLoaderRecipe, FuncRecipe]]]
+    pipeline: Union[str, dict[str, dict], list[dict]]
+
 
 
 ###############################
@@ -185,12 +195,30 @@ class PipelineRecipe(BaseModel):
 
 class ModelInfo:
 
-    _alias_map = {
+    _model_map = {
         "location": LocationRecipe,
-        "pipeline": PipelineRecipe
+        "pipeline": PipelineRecipe,
+        "function": FuncRecipe,
+        "loader": DataLoaderRecipe
     }
 
     @classmethod
-    def model_alias(cls, alias):
-        return cls._alias_map[alias]
+    def model(cls, alias):
+        return cls._model_map[alias]
+
+    @classmethod
+    def identify_model(cls, recipe: dict, log: maeve.util.Logger = None):
+        for model in cls._model_map.values():
+            try:
+                m = model(**recipe)
+                if log:
+                    log.debug(f"Recipe identified as {m.recipe_type}")
+                return m.recipe_type
+            except ValidationError:
+                continue
+
+        raise ValueError("Unable to determine recipe type")
+
+
+
 

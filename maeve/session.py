@@ -1,6 +1,6 @@
 from maeve.util import Logger, DemoUtils
 from maeve.plugins import Plugins
-from maeve.models.core import Globals, OrgConf, EnvConf, PluginParams
+from maeve.models.core import Globals, OrgConf, EnvConf, PluginParams, ModelInfo
 from maeve.conf import Confscade
 from maeve.catalogue import Catalogue, Register
 
@@ -81,9 +81,11 @@ class Session:
         self.r.recipes = self.recipes
 
     def cook(self,
-             recipe: str,
+             recipe: Union[str, dict],
+             obj: Any = None,
              add_to_catalogue: bool = True,
              anchors: dict = None,
+             catalogue_name: str = None,
              catalogue_metadata: dict = None,
              return_obj: bool = True,
              use_from_catalogue: bool = True,
@@ -104,6 +106,8 @@ class Session:
             then the corresponding value will replace the anchor. Where the same recipe name
             exists both in this dict and in the current recipe book, those in this dict
             will take precedence.
+        catalogue_name: str
+            The name to use when adding resulting object to catalogue
         catalogue_metadata: dict
             If the return object is being saved to the catalogue, then this dict
             will be used for that object's metadata.
@@ -130,43 +134,57 @@ class Session:
 
         """
 
-        if reload_recipes:
-            self._get_recipes()
+        recipe_name = None
+        if type(recipe) is str:
+            # it's re recipe names, so resolve
+            if reload_recipes:
+                self._get_recipes()
 
-        recipe_name = recipe
-        recipe = self.recipes.get(recipe, anchors=anchors, exceptonmissing=True)
+            recipe_name = catalogue_name if catalogue_name else recipe
+            recipe = self.recipes.get(recipe, anchors=anchors, exceptonmissing=True)
 
-        # use what's already in catalogue
-        if use_from_catalogue:
-            if self.c.has(recipe_name):
-                return self.c.get(recipe_name).obj
+            # use what's already in catalogue
+            if use_from_catalogue:
+                if self.c.has(recipe_name):
+                    return self.c.get(recipe_name).obj
+
+        elif type(recipe) is dict:
+            if catalogue_name:
+                recipe_name = catalogue_name
+            else:
+                add_to_catalogue = False
+        else:
+            raise ValueError("recipe must be a str (recipe name) or dict (recipe)")
 
         try:
             plugin = recipe[self.g.conf.type_field]
         except KeyError:
-            raise ValueError(f"Cannot load a recipe without a '{self.g.conf.type_field}' field")
+            # attempts to identify recipe by using model validation
+            # will raise if validates
+            plugin = ModelInfo.identify_model(recipe, log=self.log)
 
         params = recipe.get(self.g.conf.init_params_field, {})
         name, method = self.parse_plugin_name(plugin)
         mod = self.init_plugin(name, params)
-        obj = self.run_plugin(mod, recipe, method=method, *args, **kwargs)
-        if add_to_catalogue:
-            cm = catalogue_metadata if catalogue_metadata else {}
-            cm["source"] = cm.get("source", plugin)
-            cm["obj_type"] = cm.get("obj_type", str(type(obj)))
-            cm["name"] = cm.get("name", recipe_name)
+        obj = self.run_plugin(mod, recipe, method=method, obj=obj, *args, **kwargs)
+        if obj is not None:
+            if add_to_catalogue:
+                cm = catalogue_metadata if catalogue_metadata else {}
+                cm["source"] = cm.get("source", plugin)
+                cm["obj_type"] = cm.get("obj_type", str(type(obj)))
+                cm["name"] = cm.get("name", recipe_name)
 
-            # for recipes with anchors we cannot guarantee that they are the same object
-            # so we err of the side of caution
-            if anchors:
-                cm["protect"] = "increment"
-            else:
-                cm["protect"] = "overwrite"
+                # for recipes with anchors we cannot guarantee that they are the same object
+                # so we err of the side of caution
+                if anchors:
+                    cm["protect"] = "increment"
+                else:
+                    cm["protect"] = "overwrite"
 
-            self.c.add(obj, **cm)
+                self.c.add(obj, **cm)
 
-        if return_obj:
-            return obj
+            if return_obj:
+                return obj
 
     def init_plugin(
             self,
@@ -208,4 +226,3 @@ class Session:
                 return getattr(mod, plugin)
         else:
             raise TypeError(f"Invalid type {type(plugin)} passed for plugin")
-        return mod

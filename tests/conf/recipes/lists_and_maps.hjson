@@ -6,6 +6,6 @@
     },
     "TestSpotifyFiltersMin" : {
         "recipe_type" : "list",
-        "value" : ["released_year == 2023"]
+        "value" : [["released_year",  "=" , 2023]]
     }
 }

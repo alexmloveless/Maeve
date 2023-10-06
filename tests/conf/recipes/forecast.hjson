@@ -1,0 +1,5 @@
+{
+  "TestSARIMAX" : {
+    "recipe_type" : "sarimax"
+  }
+}

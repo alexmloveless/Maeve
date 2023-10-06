@@ -1,3 +1,4 @@
+import maeve
 from maeve.models.core import (
     GlobalConst, AnchorConst, FuncRecipe, LogConst,
     LocationRecipe, PipelineRecipe
@@ -352,8 +353,8 @@ class AnchorUtils:
             return recipe
         if recipe["recipe_type"] == "location":
             return LocationRecipe(paths=env_conf.paths, **recipe).model_dump()
-        if recipe["recipe_type"] == "pipeline":
-            return PipelineRecipe(**recipe).model_dump()
+        # if recipe["recipe_type"] == "pipeline":
+        #     return PipelineRecipe(**recipe).model_dump()
         if recipe["recipe_type"] in ["dict", "list"]:
             return Primitives.primitive(recipe)
 
@@ -391,7 +392,7 @@ class FuncUtils:
             try:
                 func = getattr(ns, recipe.function)
             except AttributeError:
-                cls.handle_func_fail(recipe, f"No know func called {recipe.function}")
+                cls.handle_func_fail(recipe, f"No known func called {recipe.function}")
             return cls._func(func, recipe, logger)
 
     @classmethod
@@ -417,19 +418,27 @@ class FuncUtils:
             raise RuntimeError(message)
 
     @classmethod
-    def run_pipeline(cls, recipes: Union[dict, list], obj=None):
+    def run_pipeline(cls,
+                     recipe: Union[dict, list],
+                     session,
+                     obj=None
+                     ):
         try:
-            PipelineRecipe(**recipes)
+            recipes = PipelineRecipe(**recipe).model_dump()
+            # if "metadata" in recipes.keys():
+            #     del recipes["metadata"]
             recipes = recipes["pipeline"]
         except ValidationError:
-            pass
+            recipes = recipe
 
         if type(recipes) is dict:
             # keys are only there to help manage the order of funcs and facilitate merges
             recipes = recipes.values()
+        else:
+            recipes = recipes
 
-        for recipe in recipes:
-            obj = FuncUtils.run_func(recipe, obj)
+        for r in recipes:
+            obj = session.cook(r, obj=obj, return_obj=True, add_to_catalogue=False)
 
         return obj
 

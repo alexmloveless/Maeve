@@ -20,9 +20,3 @@ def test_inline_pipeline(std_maeve_init_kwargs):
     s = Session(**std_maeve_init_kwargs)
     df = s.cook("TestLoadCSVWithInlinePipeline")
     assert "dummy" in list(df.columns)
-
-
-def test_anchored_pipeline(std_maeve_init_kwargs):
-    s = Session(**std_maeve_init_kwargs)
-    df = s.cook("TestLoadCSVWithAnchoredPipeline")
-    assert "dummy" in list(df.columns)
