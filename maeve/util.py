@@ -14,7 +14,7 @@ import json
 import hjson
 from functools import reduce
 import operator
-from typing import Union, Literal
+from typing import Union
 from collections import deque
 from datetime import datetime
 import pandas as pd
@@ -260,9 +260,10 @@ class FSUtils:
         elif re.match(r".+\.hjson$", filepath):
             return cls.read_hjson_file(filepath)
         else:
-            raise ValueError(f"Unknown file extension for file {filepath}")
+            raise RuntimeError(f"Unknown file extension for file {filepath}")
 
-    def read_json_file(self, f):
+    @staticmethod
+    def read_json_file(f):
         """
         Reads a JSON file and returns in dict form
         Parameters
@@ -277,7 +278,7 @@ class FSUtils:
             with open(f, 'rb') as fh:
                 return json.load(fh)
         except json.decoder.JSONDecodeError:
-            return
+            raise RuntimeError(f"Invalid or malformed JSON in file {f}")
 
     @staticmethod
     def read_hjson_file(f):
@@ -295,7 +296,7 @@ class FSUtils:
             with open(f, 'rb') as fh:
                 return hjson.load(fh, object_pairs_hook=dict)
         except hjson.scanner.HjsonDecodeError:
-            raise TypeError(f"Invalid or malformed HJSON in file {f}")
+            raise RuntimeError(f"Invalid or malformed HJSON in file {f}")
 
 
 
