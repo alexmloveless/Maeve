@@ -1,6 +1,6 @@
 {
 
-    "TestLoadCSVNoPipeline" : {
+    "TestLoadPandasCSVNoPipeline" : {
         "recipe_type" : "pipeline",
         "pipeline" : [
             {
@@ -12,8 +12,7 @@
         ]
     },
 
-
-    "TestLoadCSVWithInlinePipeline" : {
+    "TestLoadPandasCSVWithInlineListPipeline" : {
         "recipe_type" : "pipeline",
         "pipeline" : [
             {
@@ -31,5 +30,43 @@
                 }
             }
         ]
+    },
+    "TestLoadPandasCSVWithInlineDictPipeline" : {
+        "recipe_type" : "pipeline",
+        "pipeline" : {
+            "load_csv" : {
+                "recipe_type" : "data_loader",
+                "backend" : "pandas",
+                "function" : "read_csv",
+                "location" : "@TestCSVUTF8Location",
+            },
+            "rename_column" : {
+                "function" : "rename",
+                "kwargs" : {
+                    "columns" : {
+                        "track_name" : "dummy"
+                    }
+                }
+            }
+        }
+    },
+    "TestLoadPorlarsCSVWithInlineDictPipeline" : {
+        "inherits" : "TestLoadPandasCSVWithInlineDictPipeline",
+        "pipeline" : {
+            "load_csv" : {
+                "backend" : "polars",
+                "kwargs" : {
+                    "encoding": "UTF-8",
+                    "infer_schema_length": 10000
+                }
+            },
+            # Polars has a different signature to pandas for rename
+            "rename_column" : {
+                # this will replace the kwargs value with an empty dict
+                "kwargs" : {"mode" : "override"},
+                "args" : [{"track_name" : "dummy"}]
+            }
+        }
     }
+
 }
