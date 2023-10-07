@@ -114,11 +114,15 @@ class DictUtils:
                 except KeyError:
                     # b[i] doesn't exist
                     continue
-                try:
-                    DictUtils.__mg(a[i], b[i])
-                except KeyError:
-                    # b[i] doesn't exist
-                    continue
+                if b[i].get("mode", "merge") == "override":
+                    del b[i]["mode"]
+                    a[i] = b[i]
+                else:
+                    try:
+                        DictUtils.__mg(a[i], b[i])
+                    except KeyError:
+                        # b[i] doesn't exist
+                        continue
 
             # if they're lists append unless b[i] is already in there
             elif i in a.keys() and type(a[i]) is list:
