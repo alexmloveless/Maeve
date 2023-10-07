@@ -122,6 +122,10 @@ class ConfscadeDefaults(BaseModel):
     ERROR_ON_NOTFOUND: Optional[bool] = False
     OUTPUT_DATETIME_FMT: Optional[str] = "%Y-%m-%d %H:%M:%S"
 
+########################################################
+# Recipe Models
+########################################################
+
 
 class FuncRecipe(BaseModel):
     recipe_type: Optional[Union[Literal["function"], Literal["data_loader"]]] = "function"
@@ -146,14 +150,6 @@ class DataLoaderRecipe(FuncRecipe):
 
         self.args.insert(0, loc)
         return self
-
-
-class DataRecipe(BaseModel):
-    backend: str = "pandas"
-    load: dict = {}
-    metadata: dict = {}
-    process: Optional[Union[dict, list, str]] = None
-    write: Optional[str] = None  # think this always has to be a recipe name
 
 
 class LocationRecipe(BaseModel):
@@ -186,7 +182,6 @@ class PipelineRecipe(BaseModel):
     # pipeline: Union[dict[str, Union[PipelineRecipe, DataLoaderRecipe, FuncRecipe]],
     #                 list[Union[PipelineRecipe, DataLoaderRecipe, FuncRecipe]]]
     pipeline: Union[str, dict[str, dict], list[dict]]
-
 
 
 ###############################
