@@ -166,9 +166,15 @@ class Confscade:
                 self.log.warning(f"Config location {i} doesn't exist, ignoring")
 
     def load_and_merge(self, filepath: str):
-        c = self.fs.read_conf_file(filepath)
+        try:
+            c = self.fs.read_conf_file(filepath)
+        except RuntimeError as e:
+            self.log.error(e)
+            return
+
         if not c:
             return
+
         self.log.debug("Merging config file: {}".format(filepath))
         c = self.analyse_conf(c, filepath)
         if c:
