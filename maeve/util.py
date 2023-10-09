@@ -428,7 +428,7 @@ class FuncUtils:
     def run_pipeline(cls,
                      recipe: Union[dict, list, maeve.models.core.PipelineRecipe],
                      session,
-                     add_to_catalogue: bool = False,
+                     add_to_catalogue: bool = None,
                      obj=None
                      ):
         try:
@@ -443,8 +443,27 @@ class FuncUtils:
         else:
             recipes = recipes
 
-        for r in recipes:
+        # we want to know if the caller actively set add_to_catalogue or that this is explicitly
+        # set in the recipe one way or the other
+        # Anything but a False value will evaluate as True
+        # Recipe value takes precedence
+        add_to_catalogue = _recipes.get("add_to_catalogue", add_to_catalogue)
 
+        for r in recipes:
+            # If the recipe is a string it will cook that recipe
+            # and we assume that, since this isn't an inline recipe
+            # or was an anchor somewhere upstream that it's a first-class
+            # initialiser e.g. a loader.
+            # In the instance that an object is passed, we don't trust this decision
+            # since the object passed might not be what was expected since in
+            # for example, loaders will pass the object through even if they point towards
+            # a explicit data object on disk.
+            # The recipe can still override this decision
+            # Is this all a bit of a mess?
+            if type(r) is str and add_to_catalogue is not False and obj is None:
+                add_to_catalogue = True
+            else:
+                add_to_catalogue = False
             obj = session.cook(
                 r,
                 obj=obj,
