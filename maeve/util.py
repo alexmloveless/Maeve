@@ -102,9 +102,23 @@ class DictUtils:
                 * if B[k][i] (when treated as an _entire object_) is NOT in list A[k] then append B[k][i] to A[k]
 
         """
+        override = b.get("override_keys", [])
+        if type(override) is str:
+            override = [override]
+        elif type(override) is list:
+            pass
+        else:
+            override = []
+
         keys = set(a.keys()).union(b.keys())
         for i in keys:
 
+            if i in override:
+                try:
+                    a[i] = b[i]
+                except KeyError:
+                    # b[i] doesn't exist
+                    continue
             # if they're dicts, merge
             if i in a.keys() and type(a[i]) is dict:
                 try:

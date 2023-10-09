@@ -52,3 +52,11 @@ def test_pipeline_order_by(confscade_obj_pipeline_test):
     c = confscade_obj_pipeline_test.get("TestPipeline2")
     l = list(c["pipeline"].keys())
     assert l == d
+
+
+def test_cs_inherits_override_list(confscade_obj_base_test):
+    c = confscade_obj_base_test.get("cs_file_1_inherits_3")
+    validate = ["cs_file_1_inherits_2_i6", "cs_file_1_inherits_2_i7"]
+    assert c["cs_l1_list_1"] == validate
+
+# Same test for dict

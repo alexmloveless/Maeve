@@ -43,5 +43,10 @@
   "cs_file_1_inherits_2" : {
     "inherits" : "cs_file_1_inherits",
     "cs_l1_list_1" : ["cs_file_1_inherits_2_i5"]
+  },
+  "cs_file_1_inherits_3" : {
+    "inherits" : "cs_file_1",
+    "override_keys" : ["cs_l1_list_1"],
+    "cs_l1_list_1" : ["cs_file_1_inherits_2_i6", "cs_file_1_inherits_2_i7"]
   }
 }
