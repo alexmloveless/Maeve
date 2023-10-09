@@ -8,7 +8,7 @@
                 "backend" : "pandas",
                 "function" : "read_csv",
                 "location" : "@TestCSVUTF8Location",
-            }
+            },
         ]
     },
 
@@ -63,10 +63,50 @@
             # Polars has a different signature to pandas for rename
             "rename_column" : {
                 # this will replace the kwargs value with an empty dict
-                "kwargs" : {"mode" : "override"},
+                "kwargs" : {"_mode" : "override"},
                 "args" : [{"track_name" : "dummy"}]
             }
         }
+    },
+    "TestSimplePipelinePandas": {
+        "recipe_type" : "pipeline",
+        "pipeline": {
+            "load_csv": {
+                "recipe_type": "data_loader",
+                "backend": "pandas",
+                "function": "read_csv",
+                "location": "@TestCSVUTF8Location",
+            },
+            "rename_column": {
+                "function": "rename",
+                "kwargs": {
+                    "columns": {
+                        "track_name": "dummy"
+                    }
+                }
+            }
+        }
+    },
+    "TestLoaderPandasCSV" : {
+        "recipe_type": "data_loader",
+        "backend": "pandas",
+        "function": "read_csv",
+        "location": "@TestCSVUTF8Location"
     }
-
+    "TestFunctionRename" : {
+        "recipe_type" : "function",
+        "function": "rename",
+        "kwargs": {
+            "columns": {
+                "track_name": "dummy"
+            }
+        }
+    }
+    "TestPipelineDictWithAnchor" : {
+        "recipe_type" : "pipeline",
+        "pipeline": {
+            "load_csv" : "@TestLoaderPandasCSV",
+            "rename_column" : "@TestFunctionRename"
+        }
+    }
 }
