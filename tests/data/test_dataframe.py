@@ -38,3 +38,17 @@ def test_pandas_pipeline_anchors_load_csv(std_maeve_init_kwargs):
     s = Session(**std_maeve_init_kwargs)
     df = s.cook("TestPipelineDictWithAnchor")
     assert "dummy" in list(df.columns)
+
+
+def test_pandas_standalone_function(std_maeve_init_kwargs):
+    s = Session(**std_maeve_init_kwargs)
+    df = s.cook("TestLoaderPandasCSV")
+    df = s.cook("TestFunctionRename", obj=df)
+    assert "dummy" in list(df.columns)
+
+
+def test_pandas_pipeline_no_loader(std_maeve_init_kwargs):
+    s = Session(**std_maeve_init_kwargs)
+    df = s.cook("TestLoaderPandasCSV")
+    df = s.cook("TestSimplePipelineNoLoaderPandas", obj=df)
+    assert "dummy" in list(df.columns) and df.shape[0] == 175
