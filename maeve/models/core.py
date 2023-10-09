@@ -183,7 +183,7 @@ class PipelineRecipe(BaseModel):
     recipe_type: Literal["pipeline"] = "pipeline"
     # pipeline: Union[dict[str, Union[PipelineRecipe, DataLoaderRecipe, FuncRecipe]],
     #                 list[Union[PipelineRecipe, DataLoaderRecipe, FuncRecipe]]]
-    pipeline: Union[str, dict[str, dict], list[dict]]
+    pipeline: Union[str, dict[str, Union[dict, str]], list[Union[dict, str]]]
 
 
 ###############################

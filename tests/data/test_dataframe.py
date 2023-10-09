@@ -60,4 +60,8 @@ def test_pandas_pipeline_add_catalogue_inter_named(std_maeve_init_kwargs):
     inter_df = s.c.obj["TestLoadPandasCSVAddToCatNamed_Inter"].obj
     assert "dummy" in list(inter_df.columns) and inter_df.shape[0] == 953
 
-# test datasource datasource
+
+def test_pandas_load_csv_recipe_name_in_pipeline(std_maeve_init_kwargs):
+    s = Session(**std_maeve_init_kwargs)
+    df = s.cook("TestLoadPandasRecipeNameInPipeline")
+    assert "dummy" in list(df.columns) and df.shape[0] == 175
