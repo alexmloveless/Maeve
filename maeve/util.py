@@ -114,8 +114,8 @@ class DictUtils:
                 except KeyError:
                     # b[i] doesn't exist
                     continue
-                if b[i].get("mode", "merge") == "override":
-                    del b[i]["mode"]
+                if b[i].get("_mode", "merge") == "override":
+                    del b[i]["_mode"]
                     a[i] = b[i]
                 else:
                     try:
@@ -363,6 +363,8 @@ class AnchorUtils:
         if recipe["recipe_type"] in ["dict", "list"]:
             return Primitives.primitive(recipe)
 
+        return recipe
+
 
 class FuncUtils:
 
@@ -424,17 +426,18 @@ class FuncUtils:
 
     @classmethod
     def run_pipeline(cls,
-                     recipe: Union[dict, list],
+                     recipe: Union[dict, list, maeve.models.core.PipelineRecipe],
                      session,
+                     add_to_catalogue=False,
                      obj=None
                      ):
         try:
-            recipes = PipelineRecipe(**recipe).model_dump()
-            # if "metadata" in recipes.keys():
-            #     del recipes["metadata"]
+            recipes = _recipes = PipelineRecipe(**recipe).model_dump()
             recipes = recipes["pipeline"]
         except ValidationError:
-            recipes = recipe
+            recipes = _recipes = recipe
+
+        add_to_catalogue = _recipes.get("add_to_catalogue", add_to_catalogue)
 
         if type(recipes) is dict:
             # keys are only there to help manage the order of funcs and facilitate merges
@@ -443,7 +446,7 @@ class FuncUtils:
             recipes = recipes
 
         for r in recipes:
-            obj = session.cook(r, obj=obj, return_obj=True, add_to_catalogue=False)
+            obj = session.cook(r, obj=obj, return_obj=True, add_to_catalogue=add_to_catalogue)
 
         return obj
 
