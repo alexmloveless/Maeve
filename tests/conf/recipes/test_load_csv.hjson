@@ -68,7 +68,7 @@
             }
         }
     },
-    "TestSimplePipelinePandas": {
+    "TestSimplePipelineWithLoaderPandas": {
         "recipe_type" : "pipeline",
         "pipeline": {
             "load_csv": {
@@ -84,6 +84,23 @@
                         "track_name": "dummy"
                     }
                 }
+            }
+        }
+    },
+    "TestSimplePipelineNoLoaderPandas": {
+        "recipe_type" : "pipeline",
+        "pipeline": {
+            "rename_column": {
+                "function": "rename",
+                "kwargs": {
+                    "columns": {
+                        "track_name": "dummy"
+                    }
+                }
+            },
+            "filter_2023" : {
+                "function" : "query",
+                "args" : ["released_year == 2023"]
             }
         }
     },
