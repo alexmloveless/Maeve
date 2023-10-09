@@ -145,13 +145,15 @@ class Session:
             if reload_recipes:
                 self._get_recipes()
 
-            recipe_name = catalogue_name if catalogue_name else recipe
-            recipe = self.recipes.get(recipe, anchors=anchors, exceptonmissing=True)
-
             # use what's already in catalogue
             if use_from_catalogue:
-                if self.c.has(recipe_name):
-                    return self.c.get(recipe_name).obj
+                if self.c.has(recipe):
+                    return self.c.get(recipe).obj
+
+            recipe_name = catalogue_name if catalogue_name else recipe
+            recipe = self.recipes.get(recipe, anchors=anchors, exceptonmissing=True)
+            add_to_catalogue = recipe.get("add_to_catalogue", add_to_catalogue)
+
 
         elif type(recipe) is dict:
             # we assume that this is a valid recipe
