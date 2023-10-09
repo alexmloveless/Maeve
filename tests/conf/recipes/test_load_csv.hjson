@@ -150,5 +150,12 @@
                 "args" : ["released_year == 2023"]
             }
         }
+    },
+    "TestLoadPandasRecipeNameInPipeline" : {
+        "recipe_type" : "pipeline",
+        "pipeline" : {
+            "load_csv" : "TestLoadPandasCSVNoPipeline",
+            "do_pipeline" : "TestSimplePipelineNoLoaderPandas"
+        }
     }
 }
