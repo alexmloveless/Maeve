@@ -428,7 +428,7 @@ class FuncUtils:
     def run_pipeline(cls,
                      recipe: Union[dict, list, maeve.models.core.PipelineRecipe],
                      session,
-                     add_to_catalogue=False,
+                     add_to_catalogue: bool = False,
                      obj=None
                      ):
         try:
@@ -437,8 +437,6 @@ class FuncUtils:
         except ValidationError:
             recipes = _recipes = recipe
 
-        add_to_catalogue = _recipes.get("add_to_catalogue", add_to_catalogue)
-
         if type(recipes) is dict:
             # keys are only there to help manage the order of funcs and facilitate merges
             recipes = recipes.values()
@@ -446,7 +444,13 @@ class FuncUtils:
             recipes = recipes
 
         for r in recipes:
-            obj = session.cook(r, obj=obj, return_obj=True, add_to_catalogue=add_to_catalogue)
+
+            obj = session.cook(
+                r,
+                obj=obj,
+                return_obj=True,
+                add_to_catalogue=add_to_catalogue
+            )
 
         return obj
 

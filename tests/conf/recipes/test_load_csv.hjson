@@ -109,7 +109,7 @@
         "backend": "pandas",
         "function": "read_csv",
         "location": "@TestCSVUTF8Location"
-    }
+    },
     "TestFunctionRename" : {
         "recipe_type" : "function",
         "function": "rename",
@@ -118,12 +118,37 @@
                 "track_name": "dummy"
             }
         }
-    }
+    },
     "TestPipelineDictWithAnchor" : {
         "recipe_type" : "pipeline",
         "pipeline": {
             "load_csv" : "@TestLoaderPandasCSV",
             "rename_column" : "@TestFunctionRename"
+        }
+    },
+    "TestLoadPandasCSVAddToCatNamed" : {
+        "recipe_type" : "pipeline",
+        "pipeline" : {
+            "load_csv" : {
+                "recipe_type" : "data_loader",
+                "backend" : "pandas",
+                "function" : "read_csv",
+                "location" : "@TestCSVUTF8Location",
+            },
+            "rename_column" : {
+                "function" : "rename",
+                "add_to_catalogue" : true,
+                "catalogue_name" : "TestLoadPandasCSVAddToCatNamed_Inter",
+                "kwargs" : {
+                    "columns" : {
+                        "track_name" : "dummy"
+                    }
+                }
+            },
+            "filter_2023" : {
+                "function" : "query",
+                "args" : ["released_year == 2023"]
+            }
         }
     }
 }

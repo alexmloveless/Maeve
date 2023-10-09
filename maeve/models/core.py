@@ -132,6 +132,8 @@ class FuncRecipe(BaseModel):
     function: str
     args: Optional[list] = []
     kwargs: Optional[dict] = {}
+    add_to_catalogue: bool = False
+    catalogue_name: Optional[str] = None
     fail_silently: bool = False
 
 

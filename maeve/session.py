@@ -99,8 +99,13 @@ class Session:
         ----------
         recipe: str
             The name of recipe that exists in the recipes loaded
+        obj: Any
+            obj will be passed to plugin running the recipe, and depending on the recipe_type
+            may or may not be acted upon. Use this to, for example, pass a DataFrame
+            to a standalone function recipe or a pipeline.
         add_to_catalogue: bool
             If True any objects returned as a result of cooking will be added to the catalogue
+            Will be overridden by the synonymous flag in a recipe if present
         anchors: dict
             If anchors are present in the recipe being cooked which are keys in this dict
             then the corresponding value will replace the anchor. Where the same recipe name
@@ -149,10 +154,16 @@ class Session:
                     return self.c.get(recipe_name).obj
 
         elif type(recipe) is dict:
-            if catalogue_name:
-                recipe_name = catalogue_name
-            else:
-                add_to_catalogue = False
+            # we assume that this is a valid recipe
+            # override the in-line arg if True in recipe
+            if recipe.get("add_to_catalogue", add_to_catalogue):
+                if recipe.get("catalogue_name", catalogue_name):
+                    recipe_name = recipe["catalogue_name"]
+                    add_to_catalogue = True
+                else:
+                    # if there's no name we won't add it to the catalogue
+                    # Maybe add a warning in here to reflect this
+                    add_to_catalogue = False
         else:
             raise ValueError("recipe must be a str (recipe name) or dict (recipe)")
 
