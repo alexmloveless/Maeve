@@ -1,5 +1,5 @@
 from __future__ import annotations
-from pydantic import BaseModel, model_validator, Field, ValidationError
+from pydantic import BaseModel, model_validator, Field, ValidationError, ImportString
 from typing import Literal, Optional, Union, Dict, List
 
 import os
@@ -107,6 +107,11 @@ class EnvConf(BaseModel):
     recipes_root: Union[str, dict] = None
     paths: Union[dict] = {}
     load_demo_recipes: bool = True
+    # preload: list[ImportString] = [
+    #     "maeve.plugins.data.extensions.DataFrame",
+    #     "maeve.plugins.data.extensions.Series"
+    # ]
+
 
 
 class PluginParams(BaseModel):
