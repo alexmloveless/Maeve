@@ -58,5 +58,24 @@
         }
       }
     }
+  },
+  "TestPipeline3" : {
+    "inherits" : "TestPipeline2",
+    "recipe_type": "pipeline",
+    "pipeline": {
+      "order_by" : ["s5"],
+      "s5": {
+        "function": "f5",
+        "args": [
+          "j",
+          "k"
+        ],
+        "kwargs": {
+          "k10": "v13",
+          "k11": "v14",
+          "k12": "v15"
+        }
+      }
+    }
   }
 }
