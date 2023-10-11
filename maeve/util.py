@@ -81,7 +81,7 @@ class Logger:
 class DictUtils:
 
     @classmethod
-    def __mg(cls, a, b):
+    def __mg(cls, a, b, always_override=None):
         """
 
         Parameters
@@ -102,6 +102,7 @@ class DictUtils:
                 * if B[k][i] (when treated as an _entire object_) is NOT in list A[k] then append B[k][i] to A[k]
 
         """
+        always_override = always_override if always_override else ["order_by"]
         override = b.get("override_keys", [])
         if type(override) is str:
             override = [override]
@@ -110,9 +111,10 @@ class DictUtils:
         else:
             override = []
 
+        override = set(override + list(always_override))
+
         keys = set(a.keys()).union(b.keys())
         for i in keys:
-
             if i in override:
                 try:
                     a[i] = b[i]
