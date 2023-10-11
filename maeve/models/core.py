@@ -107,10 +107,6 @@ class EnvConf(BaseModel):
     recipes_root: Union[str, dict] = None
     paths: Union[dict] = {}
     load_demo_recipes: bool = True
-    # preload: list[ImportString] = [
-    #     "maeve.plugins.data.extensions.DataFrame",
-    #     "maeve.plugins.data.extensions.Series"
-    # ]
 
 
 

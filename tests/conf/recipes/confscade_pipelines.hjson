@@ -63,7 +63,7 @@
     "inherits" : "TestPipeline2",
     "recipe_type": "pipeline",
     "pipeline": {
-      "order_by" : ["s5"],
+      "order_by" : ["s5", "s4", "s3", "s2"],
       "s5": {
         "function": "f5",
         "args": [

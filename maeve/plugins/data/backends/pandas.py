@@ -13,6 +13,7 @@ class PandasSlicerModel(BaseModel):
             v = [v]
         return slice(*v)
 
+
 class PandasDataFrame:
     def __init__(self):
         pass
