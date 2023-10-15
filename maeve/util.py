@@ -227,6 +227,30 @@ class DictUtils:
                 v = cls.order_dicts(v)
         return d
 
+    @staticmethod
+    def parse_dotted_str(string):
+        return re.split("[./]", string)
+
+    @classmethod
+    def dict_get_by_path(cls, root: dict, path: Union[list, tuple, str]):
+        if type(path) is str:
+            path = cls.parse_dotted_str(path)
+        return reduce(operator.getitem, path, root)
+
+    @classmethod
+    def dict_set_by_path(cls, root, path, value):
+        """Set a value in a nested object in root by item sequence."""
+        if type(path) is str:
+            path = cls.parse_dotted_str(path)
+        cls.dict_get_by_path(root, path[:-1])[path[-1]] = value
+
+    @classmethod
+    def apply_overrides(cls, obj: dict, overrides: dict[str, Union[list, tuple, str]]):
+        for path, value in overrides.items():
+            cls.dict_set_by_path(obj, path, value)
+        return obj
+
+
 class FSUtils:
 
     @staticmethod
@@ -490,23 +514,25 @@ class FuncUtils:
         return obj
 
 
-class DemoUtils:
+class RecipeUtils:
     @classmethod
-    def add_demo_recipes(cls,
+    def add_package_recipes(cls,
             loc: Union[list, dict, str],
-            load_demo_recipes: bool
+            load_package_recipes: list
     ):
-        if not load_demo_recipes:
+        if len(load_package_recipes) == 0:
             return loc
 
-        d_root = g.package_paths["_demo_recipes_root"]
-
-        if type(loc) is str:
-            return [loc, d_root]
-        elif type(loc) is list:
-            loc.append(d_root)
-            return loc
+        if type(loc) in [str, list]:
+            d_root = [g.package_paths[r] for r in load_package_recipes]
+            if type(loc) is list:
+                loc.extend(d_root)
+                return loc
+            else:
+                return [loc] + d_root
         elif type(loc) is dict:
-            loc["demo_recipes"] = d_root
+            for r in load_package_recipes:
+                loc[r] = g.package_paths[r]
+            return loc
         else:
             return loc
