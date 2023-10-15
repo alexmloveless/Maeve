@@ -126,7 +126,7 @@
             "rename_column" : "@TestFunctionRename"
         }
     },
-    "TestLoadPandasCSVAddToCatNamed" : {
+    "TestoadPandasCSVAddToCatNamed" : {
         "recipe_type" : "pipeline",
         "pipeline" : {
             "load_csv" : {

@@ -1,4 +1,4 @@
-from maeve.util import Logger, DemoUtils
+from maeve.util import Logger, RecipeUtils, DictUtils
 from maeve.plugins import Plugins
 from maeve.models.core import Globals, OrgConf, EnvConf, PluginParams, ModelInfo
 from maeve.conf import Confscade
@@ -76,13 +76,15 @@ class Session:
                 loc = self.r.env.recipes_root
             else:
                 self.log.debug("No recipes locations found")
-        loc = DemoUtils.add_demo_recipes(loc, self.r.env.load_demo_recipes)
+        loc = RecipeUtils.add_package_recipes(loc, self.r.env.load_package_recipes)
         self.recipes = Confscade(loc, env_conf=self.r.env, logger=self.log)
         self.r.recipes = self.recipes
 
     def cook(self,
              recipe: Union[str, dict],
              obj: Any = None,
+             overrides: dict = None,
+             merge: dict = None,
              add_to_catalogue: bool = True,
              anchors: dict = None,
              catalogue_name: str = None,
@@ -103,6 +105,13 @@ class Session:
             obj will be passed to plugin running the recipe, and depending on the recipe_type
             may or may not be acted upon. Use this to, for example, pass a DataFrame
             to a standalone function recipe or a pipeline.
+        overrides: dict
+            a dict with "path.to.item" : "newvalue" used to override specific values
+        merge: dict
+            a dict with a structure of the same type as the recipe which will be merged
+            over the top based on the usual rules. Use this for more extensiove run time adjustments
+            to recipes. This will be applied after inheritence, anchors and overrides have been resolved.
+            This will be ignored if the recipe is a dict.
         add_to_catalogue: bool
             If True any objects returned as a result of cooking will be added to the catalogue
             Will be overridden by the synonymous flag in a recipe if present
@@ -151,7 +160,9 @@ class Session:
                     return self.c.get(recipe).obj
 
             recipe_name = catalogue_name if catalogue_name else recipe
-            recipe = self.recipes.get(recipe, anchors=anchors, exceptonmissing=True)
+            recipe = self.recipes.get(recipe, anchors=anchors, overrides=overrides, exceptonmissing=True)
+            if merge and type(merge) is dict:
+                recipe = DictUtils.mergedicts(recipe, merge)
             add_to_catalogue = recipe.get("add_to_catalogue", add_to_catalogue)
 
 
@@ -239,3 +250,22 @@ class Session:
                 return getattr(mod, plugin)
         else:
             raise TypeError(f"Invalid type {type(plugin)} passed for plugin")
+
+    ########################################
+    # Shortcuts
+    ########################################
+
+    # Data Loaders ####################
+    def read_file(self, recipe, filename, backend=None, *args, **kwargs):
+        merge = {
+            "location" : filename,
+            "args" : args,
+            "kwargs" : kwargs
+        }
+        if backend:
+            merge["backend"] = backend
+
+        return self.cook(recipe, merge=merge)
+
+    def read_csv(self, filename, backend=None, *args, **kwargs):
+        return self.read_file("read_csv", filename, backend=backend, *args, **kwargs)

@@ -1,0 +1,7 @@
+{
+  "read_csv" : {
+    "recipe_type" : "data_loader",
+    "backend" : "pandas",
+    "function" : "read_csv"
+  }
+}

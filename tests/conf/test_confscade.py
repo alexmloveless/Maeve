@@ -67,5 +67,7 @@ def test_cs_inherits_override_list(confscade_obj_base_test):
     assert c["cs_l1_list_1"] == validate
 
 
+def test_load_with_overrides(confscade_obj_base_test):
+    c = confscade_obj_base_test.get("cs_file_1", overrides={"cs_anchor1_str1": "newvalue"})
+    assert c["cs_anchor1_str1"] == "newvalue"
 
-# Same test for dict

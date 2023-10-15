@@ -79,7 +79,8 @@ class Confscade:
             exceptonmissing: bool = False,
             parse_anchors: bool = True,
             parse_directives: bool = True,
-            anchors: dict = None
+            anchors: dict = None,
+            overrides: Union[str, list, tuple] = None
             ) -> dict:
         """
         Given a valid conf name returns a fully resolved config
@@ -106,6 +107,9 @@ class Confscade:
         if parse_directives:
             # currently only parsing dict order_by
             d = DictUtils.order_dicts(d, log=self.log)
+
+        if overrides:
+            d = DictUtils.apply_overrides(d, overrides)
         return d
 
     def items(self):
