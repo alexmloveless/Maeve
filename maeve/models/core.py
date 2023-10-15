@@ -17,6 +17,7 @@ class PackageInfo:
         self._package_root = str(resources.files("maeve"))
         self._demo_recipes_root = os.path.join(self._package_root, "recipebook/demo_recipes/")
         self._package_data_recipes_root = os.path.join(self._package_root, "recipebook/data/")
+        self._package_test_recipes_root = os.path.join(self._package_root, "../tests/conf/recipes/")
 
     @property
     def package_root(self):
@@ -26,10 +27,14 @@ class PackageInfo:
     def demo_recipes_root(self):
         return self._demo_recipes_root
 
-
     @property
     def package_data_recipes_root(self):
         return self._package_data_recipes_root
+
+    @property
+    def package_test_recipes_root(self):
+        return self._package_test_recipes_root
+
 
 _pinfo = PackageInfo()
 
@@ -41,7 +46,8 @@ class GlobalConst(BaseModel):
     package_paths: dict = {
         "_package_root": _pinfo.package_root,
         "demo_recipes" : _pinfo.demo_recipes_root,
-        "data_recipes" : _pinfo.package_data_recipes_root
+        "data_recipes" : _pinfo.package_data_recipes_root,
+        "test_recipes" : _pinfo.package_test_recipes_root
     }
 
     class Config:
@@ -116,6 +122,12 @@ class EnvConf(BaseModel):
         "demo_recipes",
         "data_recipes"
     ]
+    load_test_recipes: bool = False
+    @model_validator(mode="after")
+    def test_recipes(self):
+        if self.load_test_recipes:
+            self.load_package_recipes.append("test_recipes")
+        return self
 
 
 

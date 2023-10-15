@@ -67,3 +67,7 @@ def test_pandas_load_csv_recipe_name_in_pipeline(std_maeve_init_kwargs):
     assert "dummy" in list(df.columns) and df.shape[0] == 175
 
 
+#def test_pandas_load_timeseries(std_maeve_init_kwargs):
+#    s = Session(**std_maeve_init_kwargs)
+#    df = s.cook("TestCSVTimeSeriesTempsLoad")
+

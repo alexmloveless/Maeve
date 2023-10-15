@@ -1,0 +1,18 @@
+{
+  "TestCSVTimeSeriesTempsLoader" : {
+    "recipe_type" : "data_loader",
+    "function" : "read_csv",
+    "location" : "@TestCSVTimeSeriesTemps",
+    "kwargs" : {
+      "index_col" : ["Date"],
+      "parse_dates" : ["Date"],
+      "date_format" : "%m/%d/%Y"
+    }
+  },
+  "TestCSVTimeSeriesTempsLoad" : {
+    "recipe_type": "pipeline",
+    "pipeline": {
+      "load_data": "@TestCSVTimeSeriesTempsLoader",
+    }
+  }
+}

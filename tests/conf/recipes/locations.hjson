@@ -4,9 +4,16 @@
         "path" : "spotify-2023-utf-8.csv",
         "use_path" : "test_data"
     },
+
     "TestParquetSingleLocation" : {
         "recipe_type" : "location",
         "path" : "spotify-2023.parquet",
+        "use_path" : "test_data"
+    },
+
+    "TestCSVTimeSeriesTemps" : {
+        "recipe_type" : "location",
+        "path" : "daily-minimum-temperatures-in-me.csv",
         "use_path" : "test_data"
     }
 }
