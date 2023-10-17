@@ -1,5 +1,14 @@
 from __future__ import annotations
-from pydantic import BaseModel, model_validator, Field, ValidationError, ImportString
+from pydantic import (
+    BaseModel,
+    model_validator,
+    Field,
+    ValidationError,
+    ImportString,
+    FilePath,
+    DirectoryPath,
+    ConfigDict
+)
 from typing import Literal, Optional, Union, Dict, List
 
 import os
@@ -18,6 +27,7 @@ class PackageInfo:
         self._demo_recipes_root = os.path.join(self._package_root, "recipebook/demo_recipes/")
         self._package_data_recipes_root = os.path.join(self._package_root, "recipebook/data/")
         self._package_test_recipes_root = os.path.join(self._package_root, "../tests/conf/recipes/")
+        self._cook_router_values = ["read_csv", "read_excel"]
 
     @property
     def package_root(self):
@@ -35,6 +45,10 @@ class PackageInfo:
     def package_test_recipes_root(self):
         return self._package_test_recipes_root
 
+    @property
+    def cook_router_values(self):
+        return self._cook_router_values
+
 
 _pinfo = PackageInfo()
 
@@ -43,6 +57,7 @@ class GlobalConst(BaseModel):
     package_name: str = "maeve"
     datapackagestub: str = "mv"
     package_root: str = Field(_pinfo.package_root)
+    cook_router_values: list = Field(_pinfo.cook_router_values)
     package_paths: dict = {
         "_package_root": _pinfo.package_root,
         "demo_recipes" : _pinfo.demo_recipes_root,
@@ -161,11 +176,16 @@ class FuncRecipe(BaseModel):
 
 class DataLoaderRecipe(FuncRecipe):
     recipe_type: Literal["data_loader"] = "data_loader"
-    location: Union[str, dict]
+    location: Union[FilePath, dict]
     backend: str = "pandas"
+    convert_to_func: bool = True
 
     @model_validator(mode="after")
-    def convert_to_func(self):
+    def do_convert_to_func(self):
+        if not self.convert_to_func:
+            self.convert_to_func = True # reset to default value since this recipe will likely be run again
+            return self
+
         if type(self.location) is dict:
             # TODO: Handle case where path is missing
             loc = self.location["path"]
@@ -208,6 +228,13 @@ class PipelineRecipe(BaseModel):
     pipeline: Union[str, dict[str, Union[dict, str]], list[Union[dict, str]]]
 
 
+# class FileRouter(BaseModel):
+#     model_config = ConfigDict(extra='ignore')
+#     # recipe_name: Union[Literal[*_pinfo.cook_router_values]]
+#     location: FilePath
+#     backend: Optional[str] = "pandas"
+#     args:
+
 ###############################
 #  Model Meta
 ###############################
@@ -218,11 +245,11 @@ class ModelInfo:
         "location": LocationRecipe,
         "pipeline": PipelineRecipe,
         "function": FuncRecipe,
-        "loader": DataLoaderRecipe
+        "loader": DataLoaderRecipe,
     }
 
     @classmethod
-    def model(cls, alias):
+    def get_model_by_alias(cls, alias):
         return cls._model_map[alias]
 
     @classmethod
