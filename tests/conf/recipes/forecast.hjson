@@ -1,5 +1,14 @@
 {
+  "TestSARIMAXDataLoader1" {},
+  "TestSARIMAXDataLoader2" {},
   "TestSARIMAX" : {
-    "recipe_type" : "sarimax"
+    "recipe_type" : "sm_sarimax",
+    "data" : {
+      "train" : {
+        "data_loader" : ""
+      }
+    },
+    "args" : [],
+    "kwargs" : []
   }
 }

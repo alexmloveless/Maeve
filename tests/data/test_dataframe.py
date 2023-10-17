@@ -1,7 +1,8 @@
 import pytest
-from tests.global_fixtures import std_maeve_init_kwargs
+from tests.global_fixtures import std_maeve_init_kwargs, test_data_path
 from maeve import Session
 import pandas as pd
+from os import path
 
 
 def test_pandas_load_csv(std_maeve_init_kwargs):
@@ -65,6 +66,11 @@ def test_pandas_load_csv_recipe_name_in_pipeline(std_maeve_init_kwargs):
     s = Session(**std_maeve_init_kwargs)
     df = s.cook("TestLoadPandasRecipeNameInPipeline")
     assert "dummy" in list(df.columns) and df.shape[0] == 175
+
+def test_read_csv(std_maeve_init_kwargs, test_data_path):
+    s = Session(**std_maeve_init_kwargs)
+    df = s.cook("read_csv", path.join(test_data_path, "spotify-2023-utf-8.csv"))
+    assert type(df) is pd.core.frame.DataFrame
 
 
 #def test_pandas_load_timeseries(std_maeve_init_kwargs):

@@ -1,6 +1,6 @@
 from maeve.util import Logger, RecipeUtils, DictUtils
 from maeve.plugins import Plugins
-from maeve.models.core import Globals, OrgConf, EnvConf, PluginParams, ModelInfo
+from maeve.models.core import Globals, OrgConf, EnvConf, PluginParams, ModelInfo, DataLoaderRecipe
 from maeve.conf import Confscade
 from maeve.catalogue import Catalogue, Register
 
@@ -8,6 +8,7 @@ import importlib.metadata
 import re
 import importlib
 from typing import Union, Any, Optional
+from pydantic import ValidationError
 
 
 class Session:
@@ -80,6 +81,15 @@ class Session:
         self.recipes = Confscade(loc, env_conf=self.r.env, logger=self.log)
         self.r.recipes = self.recipes
 
+    def router(func):
+        def route(self, *args, **kwargs):
+            if type(args[0]) is str and args[0] in self.g.core.cook_router_values:
+                return func(self, self._router_params(*args, **kwargs), **kwargs.get("cook_kwargs", {}))
+            return func(self, *args, **kwargs)
+        return route
+
+
+    @router
     def cook(self,
              recipe: Union[str, dict],
              obj: Any = None,
@@ -177,6 +187,8 @@ class Session:
                     # if there's no name we won't add it to the catalogue
                     # Maybe add a warning in here to reflect this
                     add_to_catalogue = False
+            else:
+                add_to_catalogue = False
         else:
             raise ValueError("recipe must be a str (recipe name) or dict (recipe)")
 
@@ -257,16 +269,16 @@ class Session:
 
     # Data Loaders ####################
 
-    def read_file(self, recipe, filename, backend=None, *args, **kwargs):
-        merge = {
-            "location" : filename,
-            "args" : args,
-            "kwargs" : kwargs
-        }
-        if backend:
-            merge["backend"] = backend
 
-        return self.cook(recipe, merge=merge)
+    def _router_params(self, *args, **kwargs):
 
-    def read_csv(self, filename, backend=None, *args, **kwargs):
-        return self.read_file("read_csv", filename, backend=backend, *args, **kwargs)
+        if args[0] in ["read_csv", "read_Excel"]:
+            if len(args) == 2:
+                kwargs["location"] = args[1]
+            kwargs["convert_to_func"] = False
+            return DataLoaderRecipe(function=args[0], **kwargs).model_dump()
+        else:
+            merge = {}
+
+        new_recipe = f"_{recipe}"
+        return new_recipe, merge
