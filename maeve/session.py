@@ -175,7 +175,6 @@ class Session:
                 recipe = DictUtils.mergedicts(recipe, merge)
             add_to_catalogue = recipe.get("add_to_catalogue", add_to_catalogue)
 
-
         elif type(recipe) is dict:
             # we assume that this is a valid recipe
             # override the in-line arg if True in recipe
@@ -209,6 +208,7 @@ class Session:
                 cm["source"] = cm.get("source", plugin)
                 cm["obj_type"] = cm.get("obj_type", str(type(obj)))
                 cm["name"] = cm.get("name", recipe_name)
+                cm["recipe"] = recipe
 
                 # for recipes with anchors we cannot guarantee that they are the same object
                 # so we err of the side of caution
@@ -269,7 +269,6 @@ class Session:
 
     # Data Loaders ####################
 
-
     def _router_params(self, *args, **kwargs):
 
         if args[0] in ["read_csv", "read_Excel"]:
@@ -278,7 +277,5 @@ class Session:
             kwargs["convert_to_func"] = False
             return DataLoaderRecipe(function=args[0], **kwargs).model_dump()
         else:
-            merge = {}
+            return {}
 
-        new_recipe = f"_{recipe}"
-        return new_recipe, merge
