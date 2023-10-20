@@ -500,10 +500,11 @@ class FuncUtils:
             # a explicit data object on disk.
             # The recipe can still override this decision
             # Is this all a bit of a mess?
-            if type(r) is str and add_to_catalogue is not False and obj is None:
-                add_to_catalogue = True
-            else:
-                add_to_catalogue = False
+            if type(r) is str:
+                if add_to_catalogue is not False and obj is None:
+                    add_to_catalogue = True
+                else:
+                    add_to_catalogue = False
             obj = session.cook(
                 r,
                 obj=obj,

@@ -1,12 +1,15 @@
 from pydantic import BaseModel
 from typing import Any, Optional
 import re
+import hashlib
+import json
 
 
 class CatalogueItem(BaseModel):
     obj: Any
     name: str
     source: str = None
+    recipe_hash: str = None
     obj_type: Optional[str] = None
     description: Optional[str] = None
     metadata: Optional[dict] = None
@@ -19,6 +22,7 @@ class Catalogue:
 
     def add(self,
             obj: Any,
+            recipe: dict = None,
             name: str = None,
             source: str = None,
             obj_type: str = None,
@@ -29,11 +33,12 @@ class Catalogue:
             ):
 
         name = self.protect(name, protect)
-
+        recipe_hash = hashlib.sha256(json.dumps(recipe).encode("utf-8")).hexdigest()
         metadata = metadata if metadata else {}
         self.obj[name] = CatalogueItem(
             obj=obj,
             name=name,
+            recipe_hash=recipe_hash,
             source=source,
             obj_type=obj_type,
             description=description,
