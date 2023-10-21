@@ -18,6 +18,8 @@ from typing import Union
 from collections import deque
 from datetime import datetime
 import pandas as pd
+import random
+import string
 
 g = GlobalConst()
 
@@ -250,6 +252,12 @@ class DictUtils:
             cls.dict_set_by_path(obj, path, value)
         return obj
 
+    @staticmethod
+    def generate_random_key(chars: int = 10, charset: str = None) -> str:
+        if not charset:
+            charset = string.ascii_lowercase + string.digits
+        return ''.join(random.choices(charset, k=chars))
+
 
 class FSUtils:
 
@@ -468,7 +476,6 @@ class FuncUtils:
     def run_pipeline(cls,
                      recipe: Union[dict, list, maeve.models.core.PipelineRecipe],
                      session,
-                     add_to_catalogue: bool = None,
                      obj=None
                      ):
         try:
@@ -483,33 +490,20 @@ class FuncUtils:
         else:
             recipes = recipes
 
-        # we want to know if the caller actively set add_to_catalogue or that this is explicitly
-        # set in the recipe one way or the other
-        # Anything but a False value will evaluate as True
-        # Recipe value takes precedence
-        add_to_catalogue = _recipes.get("add_to_catalogue", add_to_catalogue)
-
         for r in recipes:
-            # If the recipe is a string it will cook that recipe
-            # and we assume that, since this isn't an inline recipe
-            # or was an anchor somewhere upstream that it's a first-class
-            # initialiser e.g. a loader.
-            # In the instance that an object is passed, we don't trust this decision
-            # since the object passed might not be what was expected since in
-            # for example, loaders will pass the object through even if they point towards
-            # a explicit data object on disk.
-            # The recipe can still override this decision
-            # Is this all a bit of a mess?
-            if type(r) is str:
-                if add_to_catalogue is not False and obj is None:
-                    add_to_catalogue = True
-                else:
-                    add_to_catalogue = False
+            # if obj is None then this must be a loader, therefore we want to add it to the catalogue
+            # Otherwise this is just a stage, so we only add if explicitly told to do so (see below)
+            add_to_catalogue = True if obj is None else False
+            use_from_catalogue = True if obj is None else False
+
+            # Recipe value takes precedence in all cases
+            add_to_catalogue = r.get("add_to_catalogue", add_to_catalogue)
             obj = session.cook(
                 r,
                 obj=obj,
                 return_obj=True,
-                add_to_catalogue=add_to_catalogue
+                add_to_catalogue=add_to_catalogue,
+                use_from_catalogue=use_from_catalogue
             )
 
         return obj

@@ -51,7 +51,7 @@ class Session:
         )
 
         self.g = Globals()  # package level immutables
-        self.c = Catalogue()  # the store of mutable shared objects and metadata
+        self.c = Catalogue(logger=log)  # the store of mutable shared objects and metadata
         self.r = Register()  # mutable shared variables e.g. recipes
 
         self.r._org = Confscade(conf, logger=log)
@@ -63,11 +63,13 @@ class Session:
         self.log = self.c.add(
             log,
             name="session_log",
-            source=__name__,
-            obj_type="maeve.util.Logger",
-            description="The session log. Inspect object for methods for interrogating.",
-            return_item=True,
-        )
+            metadata=dict(
+                source=__name__,
+                obj_type="maeve.util.Logger",
+                description="The session log. Inspect object for methods for interrogating.",
+            ),
+            return_item="object",
+        ).obj
         self.recipes = None
         self._get_recipes()
 
@@ -145,6 +147,7 @@ class Session:
             when working with, for example, large base datasets that can be cached and used
             by multiple dependant recipes. Beware: since catalogue items
             are mutable, the object returned may not be exactly as you expect.
+            Setting this ,
             Default True.
         reload_recipes: bool
             if True will reload the entire recipe book before cooking. This is useful
@@ -157,39 +160,51 @@ class Session:
             Any objects returned by cooking the recipe
 
         """
+        _obj = obj
 
-        recipe_name = None
-        if type(recipe) is str:
-            # it's re recipe names, so resolve
-            if reload_recipes:
-                self._get_recipes()
-
-            # use what's already in catalogue
-            if use_from_catalogue:
-                if self.c.has(recipe):
-                    return self.c.get(recipe).obj
-
-            recipe_name = catalogue_name if catalogue_name else recipe
-            recipe = self.recipes.get(recipe, anchors=anchors, overrides=overrides, exceptonmissing=True)
-            if merge and type(merge) is dict:
-                recipe = DictUtils.mergedicts(recipe, merge)
-            add_to_catalogue = recipe.get("add_to_catalogue", add_to_catalogue)
-
-        elif type(recipe) is dict:
-            # we assume that this is a valid recipe
-            # override the in-line arg if True in recipe
-            if recipe.get("add_to_catalogue", add_to_catalogue):
-                if recipe.get("catalogue_name", catalogue_name):
-                    recipe_name = recipe["catalogue_name"]
-                    add_to_catalogue = True
-                else:
-                    # if there's no name we won't add it to the catalogue
-                    # Maybe add a warning in here to reflect this
-                    add_to_catalogue = False
-            else:
-                add_to_catalogue = False
+        # if we've not been passed an obj, and no adjustments are made to the recipe
+        # then the recipe was run "as is". We will save this object in the catalogue
+        # with an unmangled hash so that it can be safely reused.
+        if obj is None and anchors is None and overrides is None:
+            canonical = True
         else:
-            raise ValueError("recipe must be a str (recipe name) or dict (recipe)")
+            canonical = False
+
+
+        if reload_recipes:
+            self._get_recipes()
+
+        if type(recipe) is str:
+            recipe_name = recipe
+            recipe = self.recipes.get(recipe, anchors=anchors, overrides=overrides, exceptonmissing=True)
+        elif type(recipe) is dict:
+            recipe_name = None
+        else:
+            raise ValueError("recipe must be either str or dict")
+
+
+        # use what's already in catalogue
+        if use_from_catalogue and obj is None:
+            try:
+                self.log.debug("Attempting to retrieve from catalogue via recipe_hash")
+                _obj = self.c.get(recipe, method="obj")
+                self.log.info("Found recipe in catalogue so using that")
+                return _obj
+            except ValueError:
+                self.log.debug("hashed recipe not in catalogue")
+                pass
+
+        if merge and type(merge) is dict:
+            recipe = DictUtils.mergedicts(recipe, merge)
+        add_to_catalogue = recipe.get("add_to_catalogue", add_to_catalogue)
+
+        if recipe.get("add_to_catalogue", add_to_catalogue):
+            if recipe.get("catalogue_name", catalogue_name):
+                recipe_name = recipe["catalogue_name"]
+                add_to_catalogue = True
+        else:
+            recipe_name = catalogue_name if catalogue_name else recipe_name
+
 
         try:
             plugin = recipe[self.g.conf.type_field]
@@ -204,18 +219,16 @@ class Session:
         obj = self.run_plugin(mod, recipe, method=method, obj=obj, *args, **kwargs)
         if obj is not None:
             if add_to_catalogue:
-                cm = catalogue_metadata if catalogue_metadata else {}
-                cm["source"] = cm.get("source", plugin)
-                cm["obj_type"] = cm.get("obj_type", str(type(obj)))
+                cm = catalogue_metadata if catalogue_metadata else {"metadata": {}}
+                if canonical:
+                    cm["hash_recipe_with_obj"] = False
+                else:
+                    cm["hash_recipe_with_obj"] = True
+
                 cm["name"] = cm.get("name", recipe_name)
                 cm["recipe"] = recipe
-
-                # for recipes with anchors we cannot guarantee that they are the same object
-                # so we err of the side of caution
-                if anchors:
-                    cm["protect"] = "increment"
-                else:
-                    cm["protect"] = "overwrite"
+                cm["metadata"]["source"] = cm.get("source", plugin)
+                cm["metadata"]["obj_type"] = cm.get("obj_type", str(type(obj)))
 
                 self.c.add(obj, **cm)
 

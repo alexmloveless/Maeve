@@ -214,7 +214,7 @@ class Confscade:
             if "metadata" not in v.keys():
                 v["metadata"] = {}
             v["metadata"]["conf_file"] = f
-            v["metadata"]["loaded"] = self.str_date_time_now()
+            # v["metadata"]["loaded"] = self.str_date_time_now()
 
             # backward compatibility
             if "description" in v.keys():
