@@ -497,7 +497,8 @@ class FuncUtils:
             use_from_catalogue = True if obj is None else False
 
             # Recipe value takes precedence in all cases
-            add_to_catalogue = r.get("add_to_catalogue", add_to_catalogue)
+            if type(r) is dict:
+                add_to_catalogue = r.get("add_to_catalogue", add_to_catalogue)
             obj = session.cook(
                 r,
                 obj=obj,

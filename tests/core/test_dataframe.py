@@ -56,9 +56,10 @@ def test_pandas_pipeline_no_loader(std_maeve_init_kwargs):
 
 
 def test_pandas_pipeline_add_catalogue_inter_named(std_maeve_init_kwargs):
+    # test if catalogue_name in recipe works
     s = Session(**std_maeve_init_kwargs)
     df = s.cook("TestoadPandasCSVAddToCatNamed")
-    inter_df = s.c.obj["TestLoadPandasCSVAddToCatNamed_Inter"].obj
+    inter_df = s.c.get("TestLoadPandasCSVAddToCatNamed_Inter", method="name")
     assert "dummy" in list(inter_df.columns) and inter_df.shape[0] == 953
 
 
