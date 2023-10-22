@@ -176,7 +176,7 @@ class FuncRecipe(BaseModel):
 
 class DataLoaderRecipe(FuncRecipe):
     recipe_type: Literal["data_loader"] = "data_loader"
-    location: Union[FilePath, dict]
+    location: Union[str, dict]
     backend: str = "pandas"
     convert_to_func: bool = True
 
