@@ -5,11 +5,9 @@
         "use_path" : "_package_root"
     },
     "Yummy" : {
-        "recipe_type" : "data",
+        "recipe_type" : "data_loader",
         "backend" : "pandas",
-        "load" : {
-            "function" : "read_csv",
-            "location" : "@YummyCSV"
-        }
+        "function" : "read_csv",
+        "location" : "@YummyCSV"
     }
 }

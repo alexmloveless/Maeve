@@ -4,8 +4,6 @@ from maeve.models.core import Globals
 class Plugins:
     g = Globals()
     __plugin_alias = {
-        "data": "Data",
-        "Data": "Data",
         "list": "Primitives",
         "dict": "Primitives",
         "pipeline": "Pipeline",
@@ -15,7 +13,6 @@ class Plugins:
     }
 
     __plugin_map = {
-        "Data": (f"{g.core.package_name}.plugins.data.core", "Data"),
         "Primitives": (f"{g.core.package_name}.plugins.primitives", "Primitives"),
         "Pipeline": (f"{g.core.package_name}.plugins.core", "Pipeline"),
         "Function": (f"{g.core.package_name}.plugins.core", "Function"),

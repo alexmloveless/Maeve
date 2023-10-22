@@ -131,7 +131,7 @@ class EnvConf(BaseModel):
     name: str = "default"
     log_maxlen: int = int(1e+5)
     type: Optional[str] = None
-    recipes_root: Union[str, dict] = None
+    recipes_root: Union[str, dict, list] = None
     paths: Union[dict] = {}
     load_package_recipes: list = [
         "demo_recipes",
