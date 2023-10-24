@@ -1,11 +1,16 @@
 {
-  "TestSARIMAXDataLoader1" {},
-  "TestSARIMAXDataLoader2" {},
+  "TestSARIMAXDataLoader1": {
+    "recipe_type" : "data_loader",
+    "function" : "read_csv",
+    "location" : "daily-minimum-temperatures-in-me.csv",
+    "use_path" : "test_data"
+  },
+  "TestSARIMAXDataLoader2": {},
   "TestSARIMAX" : {
     "recipe_type" : "sm_sarimax",
     "data" : {
       "train" : {
-        "data_loader" : ""
+        "data_loader" : "TestSARIMAXDataLoader1"
       }
     },
     "args" : [],

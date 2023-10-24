@@ -87,13 +87,19 @@ class Session:
         def route(self, *args, **kwargs):
             if type(args[0]) is str and args[0] in self.g.core.cook_router_values:
                 return func(self, self._router_params(*args, **kwargs), **kwargs.get("cook_kwargs", {}))
+            if type(args[0]) is list:
+                if kwargs.get("list_mode", "sequence"):
+                    return self.cook_from_list(*args, **kwargs)
+                else:
+                    args[0] = self.recipe_list_to_pipeline(args[0])
+                    return func(*args, *kwargs)
             return func(self, *args, **kwargs)
         return route
 
 
     @router
     def cook(self,
-             recipe: Union[str, dict],
+             recipe: Union[str, dict, list],
              obj: Any = None,
              overrides: dict = None,
              merge: dict = None,
@@ -104,6 +110,7 @@ class Session:
              return_obj: bool = True,
              use_from_catalogue: bool = True,
              reload_recipes: bool = False,
+             list_mode: str = "pipeline",
              *args,
              **kwargs
              ) -> Union[Any, None]:
@@ -275,6 +282,23 @@ class Session:
                 return getattr(mod, plugin)
         else:
             raise TypeError(f"Invalid type {type(plugin)} passed for plugin")
+
+    def cook_from_list(self, recipes, *args, **kwargs):
+        objs = []
+        for r in recipes:
+            try:
+                obj = self.cook(r, *args, **kwargs)
+                if obj is not None:
+                    objs.append(obj)
+            except (KeyError, ValueError) as e:
+                self.log.warning(f"Recipe in list failed with error {e}")
+        return objs
+
+    def recipe_list_to_pipeline(self, recipes):
+        return {
+            "recipe_type": "pipeline",
+            "pipeline": recipes
+        }
 
     ########################################
     # Shortcuts

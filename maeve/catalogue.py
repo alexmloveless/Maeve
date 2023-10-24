@@ -8,7 +8,7 @@ import json
 from datetime import datetime
 import string
 from pandas.util import hash_pandas_object
-
+from copy import deepcopy
 
 class CatalogueItemModel(BaseModel):
     obj: Any
@@ -34,6 +34,7 @@ class Catalogue:
             name: str = None,
             metadata: dict = None,
             on_exists: Literal["return", "replace"] = "replace",
+            copy_obj: bool = True,
             hash_recipe_with_obj: bool = True,
             return_item: Literal["id", "object"] = "id"
             ):
@@ -43,6 +44,8 @@ class Catalogue:
 
         obj_hash = None
         if have_obj:
+            if copy_obj:
+                obj = deepcopy(obj)
             try:
                 obj_hash = self.generate_obj_hash(obj)
             except ValueError:
