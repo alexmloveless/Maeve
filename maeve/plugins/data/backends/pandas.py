@@ -28,7 +28,7 @@ class PandasDataFrame:
                          df: pd.core.dataframe.DataFrame,
                          delim: str = "_"
                          ) -> pd.core.dataframe.DataFrame:
-        """Datafunc - remove spaces from column names. Default delim is underscore
+        """Datafunc - remove spaces from column names. Default delim is underscore.
 
         Parameters
         ----------
