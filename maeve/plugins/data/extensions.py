@@ -7,8 +7,6 @@ import pandas as pd
 import polars as pl
 import importlib
 
-# TODO: Enable backends to be explictly enabled to minimise memory
-
 g = Globals()
 
 
