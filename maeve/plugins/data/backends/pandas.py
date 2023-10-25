@@ -18,6 +18,10 @@ class PandasDataFrame:
     def __init__(self):
         pass
 
+    def myfunc(self, df):
+        # do stuff
+        return df
+
     def loc_slice(self, df, index=None, columns=None):
         mod = PandasSlicerModel(index=index, columns=columns)
         return df.loc[mod.index, mod.columns]
