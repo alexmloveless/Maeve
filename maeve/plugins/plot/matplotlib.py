@@ -1,4 +1,5 @@
 import matplotlib.pyplot as plt
+import matplotlib.projections as proj
 
 class MPlot:
     def __init__(self, session):
@@ -8,24 +9,15 @@ class MPlot:
         # handle routing here via dotted strings?
         pass
 
-    def subplots(self, *args, **kwargs):
-        return SubPlots()
+    def subplots(self, recipe, *args, **kwargs):
+        return SubPlots(recipe, *args, **kwargs)
 
 class SubPlots:
     def __init__(self):
         pass
 
-    def subplots(self, recipe):
+    def subplots(self, recipe, figsize=(12, 6)):
         pass
-        # if profile:
-        #     profile = self.get_profile(profile, theme=theme)
-        # else:
-        #     profile = copy.deepcopy(self.profile)
-        #     if theme:
-        #         MPlot.set_theme(theme)
-        # if figsize:
-        #     profile["figure"]["figsize"] = figsize
-        #
         # if gridspec_kw:
         #     gs = Utils.mergedicts(profile.get("gridspec", {}), gridspec_kw)
         # else:
@@ -43,3 +35,8 @@ class SubPlots:
         #         ax = axs
         # else:
         #     self.__augment_ax(ax, profile)
+
+class MPlotProjection(plt.Axes):
+    name = "mplot"
+
+proj.register_projection(MPlotProjection)
