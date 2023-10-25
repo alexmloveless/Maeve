@@ -39,4 +39,5 @@ class SubPlots:
 class MPlotProjection(plt.Axes):
     name = "mplot"
 
+
 proj.register_projection(MPlotProjection)
