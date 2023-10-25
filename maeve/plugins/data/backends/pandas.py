@@ -1,5 +1,7 @@
+import pandas as pd
 from pydantic import BaseModel, field_validator, conlist
 from typing import Optional, Union
+import re
 
 
 class PandasSlicerModel(BaseModel):
@@ -20,6 +22,19 @@ class PandasDataFrame:
 
     def myfunc(self, df):
         # do stuff
+        return df
+
+    def unspace_colnames(self, df: pd.DataFrame, delim: str = "_") -> pd.DataFrame:
+        """Datafunc - remove spaces from column names. Default delim is underscore
+
+        Parameters
+        ----------
+        df: Dataframe
+        delim: str, default '_'
+            Delimiter to replace space with
+        """
+
+        df.columns = [re.sub(" ", delim, c) for c in df.columns]
         return df
 
     def loc_slice(self, df, index=None, columns=None):
