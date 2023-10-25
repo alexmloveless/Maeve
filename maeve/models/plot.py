@@ -8,6 +8,7 @@ from pydantic import (
 from typing import Literal, Optional, Union
 
 
+
 class MplSubplotModel(BaseModel):
     figsize: Union[list, tuple] = (12, 6)
     gridspec: dict = {}
