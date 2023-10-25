@@ -29,6 +29,9 @@ class DataFrame:
     def myfunc(self, *args, **kwargs):
         return self.backend_func("myfunc", *args, **kwargs)
 
+    def unspace_colnames(self, *args, **kwargs):
+        return self.backend_func("unspace_colnames", *args, **kwargs)
+
     #########################################################
     # Do not touch
     #########################################################
