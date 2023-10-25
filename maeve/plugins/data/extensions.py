@@ -22,6 +22,16 @@ class DataFrame:
         self.pandas = PandasDataFrame()
         self.polars = PolarsDataFrame()
 
+    #########################################################
+    # Functions
+    #########################################################
+
+    def myfunc(self, *args, **kwargs):
+        return self.backend_func("myfunc", *args, **kwargs)
+
+    #########################################################
+    # Do not touch
+    #########################################################
 
     def loc_slice(self, *args, **kwargs):
         return self.backend_func("loc_slice", *args, **kwargs)
