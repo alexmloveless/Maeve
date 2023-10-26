@@ -22,6 +22,7 @@ class PackageInfo:
         self._package_root = str(resources.files("maeve"))
         self._demo_recipes_root = os.path.join(self._package_root, "recipebook/demo_recipes/")
         self._package_data_recipes_root = os.path.join(self._package_root, "recipebook/data/")
+        self._package_plot_recipes_root = os.path.join(self._package_root, "recipebook/plot/")
         self._package_test_recipes_root = os.path.join(self._package_root, "../tests/conf/recipes/")
         self._cook_router_values = ["read_csv", "read_excel"]
 
@@ -36,6 +37,10 @@ class PackageInfo:
     @property
     def package_data_recipes_root(self):
         return self._package_data_recipes_root
+
+    @property
+    def package_plot_recipes_root(self):
+        return self._package_plot_recipes_root
 
     @property
     def package_test_recipes_root(self):
@@ -56,9 +61,10 @@ class GlobalConst(BaseModel):
     cook_router_values: list = Field(_pinfo.cook_router_values)
     package_paths: dict = {
         "_package_root": _pinfo.package_root,
-        "demo_recipes" : _pinfo.demo_recipes_root,
-        "data_recipes" : _pinfo.package_data_recipes_root,
-        "test_recipes" : _pinfo.package_test_recipes_root
+        "demo_recipes": _pinfo.demo_recipes_root,
+        "data_recipes": _pinfo.package_data_recipes_root,
+        "plot_recipes": _pinfo.package_plot_recipes_root,
+        "test_recipes": _pinfo.package_test_recipes_root
     }
 
     class Config:
@@ -131,7 +137,8 @@ class EnvConf(BaseModel):
     paths: Union[dict] = {}
     load_package_recipes: list = [
         "demo_recipes",
-        "data_recipes"
+        "data_recipes",
+        "plot_recipes"
     ]
     load_test_recipes: bool = False
     @model_validator(mode="after")

@@ -1,0 +1,5 @@
+{
+  "subplots" : {
+    "recipe_type" : "mpl_subplots"
+  }
+}

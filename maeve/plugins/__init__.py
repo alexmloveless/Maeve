@@ -10,13 +10,15 @@ class Plugins:
         "function": "Function",
         "data_loader": "DataLoader",
         "dataloader": "DataLoader",
+        "mpl_subplots": "MplPlot"
     }
 
     __plugin_map = {
         "Primitives": (f"{g.core.package_name}.plugins.primitives", "Primitives"),
         "Pipeline": (f"{g.core.package_name}.plugins.core", "Pipeline"),
         "Function": (f"{g.core.package_name}.plugins.core", "Function"),
-        "DataLoader": (f"{g.core.package_name}.plugins.data.extensions", "DataLoader")
+        "DataLoader": (f"{g.core.package_name}.plugins.data.extensions", "DataLoader"),
+        "MplPlot": (f"{g.core.package_name}.plugins.plot.matplotlib", "MplPlot")
     }
 
     @classmethod

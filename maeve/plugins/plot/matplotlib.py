@@ -1,43 +1,50 @@
+from maeve.models.plot import MplGetSubplotsModel
 import matplotlib.pyplot as plt
 import matplotlib.projections as proj
+import numpy as np
+from typing import Union, Literal, Sequence, Any
 
-class MPlot:
+class MplPlot:
     def __init__(self, session):
         self.s = session
 
-    def main(self, recipe):
-        # handle routing here via dotted strings?
-        pass
+    def subplots_recipe(self, recipe: dict, obj: Any = None) -> tuple:
+        recipe = MplGetSubplotsModel(**recipe).model_dump()
+        # handle if passed a data recipe
+        # pass obj down into ax?
+        return self.subplots(**recipe)
 
-    def subplots(self, recipe, *args, **kwargs):
-        return SubPlots(recipe, *args, **kwargs)
+    main = subplots_recipe
 
-class SubPlots:
-    def __init__(self):
-        pass
 
-    def subplots(self, recipe, figsize=(12, 6)):
-        pass
-        # if gridspec_kw:
-        #     gs = Utils.mergedicts(profile.get("gridspec", {}), gridspec_kw)
-        # else:
-        #     gs = profile.get("gridspec", None)
-        # sp = profile.get("subplots", None)
-        # fig = profile.get("figure", None)
-        # # theme = profile.get("theme", None)
-        #
-        # fig, ax = plt.subplots(rows, columns, gridspec_kw=gs, subplot_kw=sp, **fig, **kwargs)
-        # if type(ax) is np.ndarray:
-        #     axs = ax.flatten()
-        #     for a in axs:
-        #         self.__augment_ax(a, profile)
-        #     if flattenax:
-        #         ax = axs
-        # else:
-        #     self.__augment_ax(ax, profile)
+    def subplots(self,
+                 flattenax: bool = True,
+                 rcparams: dict = None,
+                 **kwargs
+                 ) -> tuple:
+        rcparams = rcparams if rcparams else {}
+        with plt.rc_context(rcparams):
+            fig, ax = plt.subplots(**kwargs)
+            data = None
+            if type(ax) is np.ndarray:
+                axs = ax.flatten()
+                for a in axs:
+                    self.__augment_ax(a, data)
+                if flattenax:
+                    ax = axs
+            else:
+                self.__augment_ax(ax, data)
+
+            return fig, ax
+
+    def __augment_ax(self, ax, data):
+        return ax
+
 
 class MPlotProjection(plt.Axes):
     name = "mplot"
+
+    # custom ax functions go here
 
 
 proj.register_projection(MPlotProjection)
