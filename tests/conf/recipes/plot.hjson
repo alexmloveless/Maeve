@@ -1,0 +1,15 @@
+{
+  "TestRCParams" : {
+    "recipe_type" : "dict",
+    "value" : {
+      "axes.facecolor" : "#232323"
+    }
+  },
+  "TestMatplotlibSubplot" : {
+    "recipe_type" : "mpl_subplots",
+    "rcparams" : "@TestRCParams",
+    "subplots_kwargs" : {
+      "figsize": [12, 6]
+    }
+  }
+}
