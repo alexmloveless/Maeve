@@ -25,9 +25,9 @@ class PandasDataFrame:
         return df
 
     def unspace_colnames(self,
-                         df: pd.core.dataframe.DataFrame,
+                         df: pd.DataFrame,
                          delim: str = "_"
-                         ) -> pd.core.dataframe.DataFrame:
+                         ) -> pd.DataFrame:
         """Datafunc - remove spaces from column names. Default delim is underscore.
 
         Parameters
