@@ -87,9 +87,6 @@ class PandasDataFrame:
         Update a single value with value from another row, same column with a multiplier:
             replace_column_values(df, 'streams', index=574, replace_index=575, multiplier=2)
         """
-        print("Entered replace_column_values.")
-        print(locals())
-        df = df.copy()
 
         # Query will override index even if supplied
         if qry:
