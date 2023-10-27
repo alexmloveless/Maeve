@@ -14,11 +14,18 @@ class MplSubplotkwModel(BaseModel):
     projection: Optional[Literal["mplot"]] = "mplot"
 
 
-class MplGetSubplotsModel(BaseModel):
+class MplSubplotsModel(BaseModel):
     recipe_type: Literal["mpl_subplots"]
     rcparams: dict = {}
     flattenax: bool = True
     subplot_kw: Optional[MplSubplotkwModel] = MplSubplotkwModel()
+
+class MplPlotModel(BaseModel):
+    recipe_type: Literal["mpl_plot"]
+    plot_type: Optional[str] = None
+    data_recipe: Optional[str, dict] = None
+    subplots_kwargs: MplSubplotsModel
+    plot_kwargs: dict = {}
 
     @model_validator(mode="after")
     def rm_recipe_type(self):
