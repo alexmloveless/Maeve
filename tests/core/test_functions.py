@@ -18,8 +18,8 @@ def test_replace_column_values(std_maeve_init_kwargs):
     s = Session(**std_maeve_init_kwargs)
     df = s.cook("TestLoadPandasCSVNoPipeline")
     # Update a single value with a scalar:
-    # df1 = df.mv.replace_column_values('streams', index=574, replace_val=0)
-    # assert df1.loc[574, 'streams'] == 0
+    df1 = df.mv.replace_column_values('streams', index=574, replace_val=0)
+    assert df1.loc[574, 'streams'] == 0
 
     # Update a single value with value from another column, same row:
     df1 = df.mv.replace_column_values('streams', index=574, replace_cols='released_year')
