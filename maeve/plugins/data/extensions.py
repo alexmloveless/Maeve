@@ -43,7 +43,7 @@ class DataFrame:
         return self.backend_func("iloc_slice", *args, **kwargs)
 
     def backend_func(self, func, *args, **kwargs):
-        return getattr(getattr(self, self.backend), func)(self._df, *args, *kwargs)
+        return getattr(getattr(self, self.backend), func)(self._df, *args, **kwargs)
 
     def df_info(self):
         self.is_pd = True if type(self._df) is pd.core.frame.DataFrame else False
