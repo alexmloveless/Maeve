@@ -30,6 +30,8 @@ class DataFrame:
     def unspace_colnames(self, *args, **kwargs):
         return self.backend_func("unspace_colnames", *args, **kwargs)
 
+    def replace_column_values(self, *args, **kwargs):
+        return self.backend_func("replace_column_values", *args, **kwargs)
     #########################################################
     # Do not touch
     #########################################################
