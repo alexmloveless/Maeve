@@ -437,11 +437,8 @@ class FuncUtils:
             try:
                 func = getattr(obj, recipe.function)
             except AttributeError:
-                try:
-                    func = getattr(ns, recipe.function)
-                except AttributeError:
-                    return cls.handle_func_fail(recipe, f"No known func called {recipe.function}", ret=obj)
-                return cls._func(func, recipe, obj, logger)
+                func = cls._try_namespaces(recipe, obj, ns=ns)
+
             return cls._func(func, recipe, logger)
         else:
             try:
@@ -449,6 +446,30 @@ class FuncUtils:
             except AttributeError:
                 cls.handle_func_fail(recipe, f"No known func called {recipe.function}")
             return cls._func(func, recipe, logger)
+
+    @classmethod
+    def _try_namespaces(cls, recipe, obj, ns=None):
+        if ns:
+            try:
+                return getattr(ns, recipe.function)
+            except AttributeError:
+                return cls.handle_func_fail(recipe,
+                                           f"No known func called {recipe.function} in given namespace", ret=obj)
+        if obj is not None:
+            if recipe.namespace:
+                namespaces = [recipe.namespace]
+            else:
+                namespaces = g.func_namespaces
+            for n in namespaces:
+                try:
+                    _ns = getattr(obj, n)
+                except AttributeError:
+                    continue
+                try:
+                    return getattr(_ns, recipe.function)
+                except AttributeError:
+                    continue
+        return cls.handle_func_fail(recipe, f"No known func called {recipe.function} in any namespace", ret=obj)
 
     @classmethod
     def _func(cls, func, recipe, obj=None, logger=None):

@@ -10,7 +10,6 @@ from typing import Literal, Optional, Union
 import os
 from importlib import resources
 
-import maeve.util
 
 
 ###############################
@@ -25,6 +24,8 @@ class PackageInfo:
         self._package_plot_recipes_root = os.path.join(self._package_root, "recipebook/plot/")
         self._package_test_recipes_root = os.path.join(self._package_root, "../tests/conf/recipes/")
         self._cook_router_values = ["read_csv", "read_excel"]
+        self._data_package_stub = "mv"
+        self._func_namespaces = [self._data_package_stub]
 
     @property
     def package_root(self):
@@ -50,15 +51,24 @@ class PackageInfo:
     def cook_router_values(self):
         return self._cook_router_values
 
+    @property
+    def data_package_stub(self):
+        return self._data_package_stub
+
+    @property
+    def func_namespaces(self):
+        return self._func_namespaces
+
 
 _pinfo = PackageInfo()
 
 
 class GlobalConst(BaseModel):
     package_name: str = "maeve"
-    datapackagestub: str = "mv"
+    datapackagestub: str = Field(_pinfo.data_package_stub)
     package_root: str = Field(_pinfo.package_root)
     cook_router_values: list = Field(_pinfo.cook_router_values)
+    func_namespaces: list = Field(_pinfo.func_namespaces)
     package_paths: dict = {
         "_package_root": _pinfo.package_root,
         "demo_recipes": _pinfo.demo_recipes_root,
@@ -172,6 +182,7 @@ class FuncRecipe(BaseModel):
     function: str
     args: Optional[list] = []
     kwargs: Optional[dict] = {}
+    namespace: Optional[str] = None
     add_to_catalogue: bool = False
     catalogue_name: Optional[str] = None
     fail_silently: bool = False

@@ -157,5 +157,19 @@
             "load_csv" : "TestLoadPandasCSVNoPipeline",
             "do_pipeline" : "TestSimplePipelineNoLoaderPandas"
         }
+    },
+    "TestSimplePipelineWithLoaderPandasMvFunc": {
+        "recipe_type" : "pipeline",
+        "pipeline": {
+            "load_csv": {
+                "recipe_type": "data_loader",
+                "backend": "pandas",
+                "function": "read_csv",
+                "location": "@TestCSVUTF8Location",
+            },
+            "rename_column": {
+                "function": "unspace_colnames"
+            }
+        }
     }
 }
