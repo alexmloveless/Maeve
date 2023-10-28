@@ -2,17 +2,20 @@ from maeve.models.plot import MplSubplotsModel, MplPlotModel
 import matplotlib.pyplot as plt
 import matplotlib.projections as proj
 import numpy as np
-from typing import Any
+from typing import Any, Union
+
+class Subplots:
+    def __init__(self, fig, ax):
+        self.fig = fig
+        self.ax = ax
 
 class MplPlot:
     def __init__(self, session):
         self.s = session
 
-    def subplots(self, recipe: dict, obj: Any = None) -> tuple:
+    def main(self, recipe: dict, obj: Any = None) -> tuple:
         recipe = MplSubplotsModel(**recipe).model_dump()
         return self.subplots(**recipe)
-
-    main = subplots
 
     def plot(self, recipe: dict, obj: Any = None) -> tuple:
         recipe = MplPlotModel(**recipe).model_dump()
@@ -41,8 +44,9 @@ class MplPlot:
     def subplots(self,
                  flattenax: bool = True,
                  rcparams: dict = None,
+                 as_obj: bool = False,
                  **kwargs
-                 ) -> tuple:
+                 ) -> Union[Subplots, tuple]:
         rcparams = rcparams if rcparams else {}
         with plt.rc_context(rcparams):
             fig, ax = plt.subplots(**kwargs)
@@ -56,6 +60,9 @@ class MplPlot:
             else:
                 self.__augment_ax(ax, data)
 
+        if as_obj:
+            return Subplots(fig, ax)
+        else:
             return fig, ax
 
     def __augment_ax(self, ax, data):
