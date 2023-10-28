@@ -25,7 +25,7 @@ class PackageInfo:
         self._package_test_recipes_root = os.path.join(self._package_root, "../tests/conf/recipes/")
         self._cook_router_values = ["read_csv", "read_excel"]
         self._data_package_stub = "mv"
-        self._func_namespaces = [self._data_package_stub]
+        self._func_namespaces = [self._data_package_stub, "fig", "ax"]
 
     @property
     def package_root(self):
@@ -267,7 +267,7 @@ class ModelInfo:
         return cls._model_map[alias]
 
     @classmethod
-    def identify_model(cls, recipe: dict, log: maeve.util.Logger = None):
+    def identify_model(cls, recipe: dict, log=None):
         for model in cls._model_map.values():
             try:
                 m = model(**recipe)

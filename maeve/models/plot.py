@@ -18,6 +18,7 @@ class MplSubplotsModel(BaseModel):
     recipe_type: Literal["mpl_subplots"] = "mpl_subplots"
     rcparams: dict = {}
     flattenax: bool = True
+    as_obj: bool = False
     subplot_kw: Optional[MplSubplotkwModel] = MplSubplotkwModel()
 
     @model_validator(mode="after")
