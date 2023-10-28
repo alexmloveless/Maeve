@@ -5,11 +5,15 @@
       "axes.facecolor" : "#232323"
     }
   },
-  "TestMatplotlibSubplot" : {
+  "TestMplSubplot" : {
     "recipe_type" : "mpl_subplots",
     "rcparams" : "@TestRCParams",
     "subplots_kwargs" : {
       "figsize": [12, 6]
     }
+  },
+  "TestMplStackedBarNoData" : {
+    "recipe_type" : "mpl_plot",
+    "plot_type" : "stackedbar"
   }
 }

@@ -15,15 +15,15 @@ class Plugins:
     }
 
     __plugin_map = {
-        "Primitives": (f"{g.core.package_name}.plugins.primitives", "Primitives"),
-        "Pipeline": (f"{g.core.package_name}.plugins.core", "Pipeline"),
-        "Function": (f"{g.core.package_name}.plugins.core", "Function"),
-        "DataLoader": (f"{g.core.package_name}.plugins.data.extensions", "DataLoader"),
-        "MplSubPlot": (f"{g.core.package_name}.plugins.plot.matplotlib", "MplPlot"),
-        "MplPlot": (f"{g.core.package_name}.plugins.plot.matplotlib", "MplPlot.plot")
+        "Primitives": (f"{g.core.package_name}.plugins.primitives", "Primitives", "main"),
+        "Pipeline": (f"{g.core.package_name}.plugins.core", "Pipeline", "main"),
+        "Function": (f"{g.core.package_name}.plugins.core", "Function", "main"),
+        "DataLoader": (f"{g.core.package_name}.plugins.data.extensions", "DataLoader", "main"),
+        "MplSubPlot": (f"{g.core.package_name}.plugins.plot.matplotlib", "MplPlot", "main"),
+        "MplPlot": (f"{g.core.package_name}.plugins.plot.matplotlib", "MplPlot", "plot")
     }
 
     @classmethod
     def resolve_plugin(cls, plugin):
-        return cls.__plugin_map.get(cls.__plugin_alias.get(plugin, None), (None, None))
+        return cls.__plugin_map.get(cls.__plugin_alias.get(plugin, None), (None, None, None))
 

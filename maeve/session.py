@@ -221,8 +221,11 @@ class Session:
             plugin = ModelInfo.identify_model(recipe, log=self.log)
 
         params = recipe.get(self.g.conf.init_params_field, {})
-        name, method = self.parse_plugin_name(plugin)
-        mod = self.init_plugin(name, params)
+        name, req_method = self.parse_plugin_name(plugin)
+        mod, target_method = self.init_plugin(name, params)
+        if all([req_method, target_method]):
+            raise ValueError("Both recipe and plugin target contained a method request. Cannot resolve")
+        method = target_method if target_method else req_method # method defaults to None
         obj = self.run_plugin(mod, recipe, method=method, obj=obj, *args, **kwargs)
         if obj is not None:
             if add_to_catalogue:
@@ -249,7 +252,8 @@ class Session:
     ):
         params = params if params else {}
         params = PluginParams(**params)
-        return self.find_plugin(plugin)(self, *params.class_args, **params.class_kwargs)
+        cls, method = self.find_plugin(plugin)
+        return cls(self, *params.class_args, **params.class_kwargs), method
 
     def run_plugin(self, mod, recipe, method: str = None, *args, **kwargs):
         if not method:
@@ -265,12 +269,12 @@ class Session:
 
     def find_plugin(self, plugin: Union[str, list, tuple]):
         if type(plugin) is str:
-            bundled_plugin, cls = Plugins.resolve_plugin(plugin)
+            bundled_plugin, cls, method = Plugins.resolve_plugin(plugin)
             if bundled_plugin:
                 # see if it's a bundled plugin
                 self.log.debug(f"Found bundled plugin {bundled_plugin} attempting to import via {__name__}")
                 mod = importlib.import_module(bundled_plugin)
-                return getattr(mod, cls)
+                return getattr(mod, cls), method
             else:
                 try:
                     # otherwise try and import from system
@@ -279,7 +283,7 @@ class Session:
                 except ModuleNotFoundError:
                     # give up
                     raise ValueError(f"No plugin found with name {plugin}")
-                return getattr(mod, plugin)
+                return getattr(mod, plugin), None
         else:
             raise TypeError(f"Invalid type {type(plugin)} passed for plugin")
 

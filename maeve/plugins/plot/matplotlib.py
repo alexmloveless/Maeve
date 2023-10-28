@@ -1,4 +1,4 @@
-from maeve.models.plot import MplSubplotsModel
+from maeve.models.plot import MplSubplotsModel, MplPlotModel
 import matplotlib.pyplot as plt
 import matplotlib.projections as proj
 import numpy as np
@@ -15,7 +15,7 @@ class MplPlot:
     main = subplots
 
     def plot(self, recipe: dict, obj: Any = None) -> tuple:
-        recipe = MplSubplotsModel(**recipe).model_dump()
+        recipe = MplPlotModel(**recipe).model_dump()
         if recipe["plot_type"]:
             plot_type = recipe["plot_type"]
             if obj is None:
@@ -67,7 +67,7 @@ class MPlotProjection(plt.Axes):
 
     def stackedbar(self, df, **kwargs):
         cols = []
-        for c in df.iteritems():
+        for c in df.iterrows():
             if len(cols) == 0:
                 self.bar(c[1].index, c[1], label=c[0], **kwargs)
                 cols = c[1]
