@@ -32,6 +32,10 @@ class DataFrame:
 
     def replace_column_values(self, *args, **kwargs):
         return self.backend_func("replace_column_values", *args, **kwargs)
+
+    def recipe(self, df, recipe, session, **kwargs):
+        return session.cook(recipe, obj=df, **kwargs)
+
     #########################################################
     # Do not touch
     #########################################################
