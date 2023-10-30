@@ -4,10 +4,12 @@ import matplotlib.projections as proj
 import numpy as np
 from typing import Any, Union
 
+
 class Subplots:
     def __init__(self, fig, ax):
         self.fig = fig
         self.ax = ax
+
 
 class MplPlot:
     def __init__(self, session):
@@ -81,7 +83,6 @@ class MPlotProjection(plt.Axes):
             else:
                 self.bar(c[1].index, c[1], bottom=cols, label=c[0], **kwargs)
                 cols = cols + c[1]
-
 
 
 proj.register_projection(MPlotProjection)
