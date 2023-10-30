@@ -2,6 +2,7 @@ from __future__ import annotations
 from pydantic import (
     BaseModel,
     model_validator,
+    field_validator,
     Field,
     ValidationError
 )
@@ -157,6 +158,12 @@ class EnvConf(BaseModel):
             self.load_package_recipes.append("test_recipes")
         return self
 
+    @field_validator('recipes_root')
+    @classmethod
+    def name_must_contain_space(cls, recipes_root: Union[str, dict, list]) -> Union[list, dict]:
+        if type(recipes_root) is str:
+            recipes_root = [recipes_root]
+        return recipes_root
 
 
 class PluginParams(BaseModel):

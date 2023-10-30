@@ -76,7 +76,7 @@ class Session:
     def _get_recipes(self, loc: Union[str, list] = None):
         if not loc:
             if self.r.env.recipes_root:
-                loc = self.r.env.recipes_root
+                loc = self.r.env.recipes_root.copy()
             else:
                 self.log.debug("No recipes locations found")
         loc = RecipeUtils.add_package_recipes(loc, self.r.env.load_package_recipes)
