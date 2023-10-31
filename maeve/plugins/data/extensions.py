@@ -27,6 +27,9 @@ class DataFrame:
     def myfunc(self, *args, **kwargs):
         return self.backend_func("myfunc", *args, **kwargs)
 
+    def apply_to_columns(self, *args, **kwargs):
+        return self.backend_func("apply_to_columns", *args, **kwargs)
+
     def unspace_colnames(self, *args, **kwargs):
         return self.backend_func("unspace_colnames", *args, **kwargs)
 
@@ -74,9 +77,11 @@ class Series:
     def mangle_columns(self):
         return self.backend_func("mangle_columns")
 
+    def clean_str_to_float(self, *args, **kwargs):
+        return self.backend_func("clean_str_to_float", *args, **kwargs)
 
     def backend_func(self, func, *args, **kwargs):
-        return getattr(getattr(self, self.backend), func)(self._df, *args, *kwargs)
+        return getattr(getattr(self, self.backend), func)(self._df, *args, **kwargs)
 
     def df_info(self):
         self.is_pd = True if type(self._df) is pd.core.series.Series else False
