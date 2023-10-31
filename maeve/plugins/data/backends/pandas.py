@@ -24,8 +24,44 @@ class PandasDataFrame:
         # do stuff
         return df
 
-    def unspace_colnames(self,
+    @staticmethod
+    def apply_to_columns(func,
                          df: pd.DataFrame,
+                         cols: Union[str, list[str]],
+                         *args,
+                         new_col: str = None,
+                         **kwargs) -> pd.DataFrame:
+        """Apply a series function to 1 or more columns of a dataframe.
+
+        Parameters
+        ----------
+        func: object (function)
+            Any function that acts on a series (can supply native pandas by pd.Series.func)
+        df: pd.DataFrame
+        cols: str or list of str
+            The column(s) to act on
+        args: arguments
+            args of function being called
+        new_col: str, optional, default None
+            Name of the new column to be created with the new values
+        kwargs: keyword arguments
+            kwargs of function being called
+
+        Returns
+        -------
+        pd.DataFrame
+        """
+        if new_col and type(cols) is str:
+            df[new_col] = func(df[cols], *args, **kwargs)
+        else:
+            cols = [cols] if type(cols) is str else cols
+            if type(cols) is list:
+                for col in cols:
+                    df[col] = func(df[col], *args, **kwargs)
+        return df
+
+    @staticmethod
+    def unspace_colnames(df: pd.DataFrame,
                          delim: str = "_"
                          ) -> pd.DataFrame:
         """Datafunc - remove spaces from column names. Default delim is underscore.
@@ -118,3 +154,39 @@ class PandasDataFrame:
     def iloc_slice(self, df, index=None, columns=None):
         mod = PandasSlicerModel(index=index, columns=columns)
         return df.iloc[mod.index, mod.columns]
+
+
+class PandasSeries:
+    def __init__(self):
+        pass
+
+    @staticmethod
+    def clean_str_to_float(series: pd.Series,
+                           fillna: str = '0') -> pd.Series:
+        """Clean values from string to floats.
+        Removes common non-numeric characters that can appear in Excel spreadsheets and converts to float:
+            commas removed;
+            '-' on its own removed (but left in if it before a number as a minus eg -1.5)
+            converts brackets to a negative float;
+            Positive numbers also get converted to floats.
+        Eg (1,000) will become -1000.
+
+        Parameters
+        ----------
+        series: pd.Series
+            Data to be cleaned
+        fillna: str, optional, default '0'
+            Fill nans first before converting.
+
+        Returns
+        -------
+        pd.Series
+        """
+
+        if fillna or type(fillna) is str:
+            series = series.fillna(fillna)
+        series = series.astype(str)
+        series = series.str.replace(',', '')
+        series = series.str.replace(r'^-$', '0', regex=True)
+        series = series.apply(lambda x: -float(x.strip('()')) if '(' in x else float(x))
+        return series
