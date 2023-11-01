@@ -1,6 +1,5 @@
 from maeve.models.core import Globals
 
-
 class Plugins:
     g = Globals()
     __plugin_alias = {

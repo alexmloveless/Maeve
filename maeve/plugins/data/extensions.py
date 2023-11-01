@@ -41,15 +41,15 @@ class DataFrame:
     def recipe(self, df, recipe, session, **kwargs):
         return session.cook(recipe, obj=df, **kwargs)
 
-    #########################################################
-    # Do not touch
-    #########################################################
-
     def loc_slice(self, *args, **kwargs):
         return self.backend_func("loc_slice", *args, **kwargs)
 
     def iloc_slice(self, *args, **kwargs):
         return self.backend_func("iloc_slice", *args, **kwargs)
+
+    #########################################################
+    # Do not touch
+    #########################################################
 
     def backend_func(self, func, *args, **kwargs):
         return getattr(getattr(self, self.backend), func)(self._df, *args, **kwargs)
@@ -114,3 +114,16 @@ class DataLoader:
     @staticmethod
     def get_backend(backend):
         return importlib.import_module(backend)
+
+
+class Data:
+    def __init__(self):
+        pass
+
+    def PandasDataFrame(self, *args, **kwargs):
+        return pd.DataFrame(*args, **kwargs)
+
+    DataFrame = PandasDataFrame
+
+    def PolarsDataFrame(self, *args, **kwargs):
+        return pl.DataFrame(*args, **kwargs)

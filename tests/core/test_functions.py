@@ -36,7 +36,7 @@ def test_replace_column_values(std_maeve_init_kwargs):
 
 def test_clean_str_to_float(std_maeve_init_kwargs):
     s = Session(**std_maeve_init_kwargs)
-    df = pd.DataFrame({'vals': ['(17.0)', '1,000.0', '-'], 'vals2': ['(27.0)', '1,025.0', '-']},
+    df = s.data.DataFrame({'vals': ['(17.0)', '1,000.0', '-'], 'vals2': ['(27.0)', '1,025.0', '-']},
                       index=['Portland', 'Berkeley', 'Cambridge'])
-    df = df.mv.apply_to_columns(Series.clean_str_to_float, ['vals', 'vals2'], fillna='0')
+    df = df.mv.apply_to_columns("clean_str_to_float", ['vals', 'vals2'], fillna='0')
     assert df.vals.dtype == float
