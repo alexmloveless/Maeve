@@ -25,9 +25,10 @@ class PandasDataFrame:
         return df
 
     @staticmethod
-    def apply_to_columns(func,
+    def apply_to_columns(
                          df: pd.DataFrame,
-                         cols: Union[str, list[str]],
+                         func: str,
+                         cols: Optional[Union[str, list[str]]] = None,
                          *args,
                          new_col: str = None,
                          **kwargs) -> pd.DataFrame:
@@ -51,6 +52,8 @@ class PandasDataFrame:
         -------
         pd.DataFrame
         """
+        func = getattr(PandasSeries, func)
+        cols = cols if cols else list(df.columns)
         if new_col and type(cols) is str:
             df[new_col] = func(df[cols], *args, **kwargs)
         else:
