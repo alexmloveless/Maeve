@@ -20,10 +20,6 @@ class PandasDataFrame:
     def __init__(self):
         pass
 
-    def myfunc(self, df):
-        # do stuff
-        return df
-
     @staticmethod
     def apply_to_columns(
                          df: pd.DataFrame,

@@ -3,6 +3,7 @@ from maeve.plugins import Plugins
 from maeve.models.core import Globals, OrgConf, EnvConf, PluginParams, ModelInfo, DataLoaderRecipe
 from maeve.conf import Confscade
 from maeve.catalogue import Catalogue, Register
+from maeve.plugins.data.extensions import Data
 
 import importlib.metadata
 import re
@@ -72,6 +73,8 @@ class Session:
         ).obj
         self.recipes = None
         self._get_recipes()
+
+        self.data = Data()
 
     def _get_recipes(self, loc: Union[str, list] = None):
         if not loc:
