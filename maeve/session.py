@@ -1,15 +1,14 @@
-from maeve.util import Logger, RecipeUtils, DictUtils
-from maeve.plugins import Plugins
-from maeve.models.core import Globals, OrgConf, EnvConf, PluginParams, ModelInfo, DataLoaderRecipe
-from maeve.conf import Confscade
-from maeve.catalogue import Catalogue, Register
-from maeve.plugins.data.extensions import Data
-
+import importlib
 import importlib.metadata
 import re
-import importlib
 from typing import Union, Any, Optional
-from pydantic import ValidationError
+
+from maeve.catalogue import Catalogue, Register
+from maeve.conf import Confscade
+from maeve.models.core import Globals, OrgConf, EnvConf, PluginParams, ModelInfo, DataLoaderRecipe
+from maeve.plugins import Plugins
+from maeve.plugins.data.extensions import Data
+from maeve.util import Logger, RecipeUtils, DictUtils
 
 
 class Session:
@@ -97,8 +96,8 @@ class Session:
                     args[0] = self.recipe_list_to_pipeline(args[0])
                     return func(*args, *kwargs)
             return func(self, *args, **kwargs)
-        return route
 
+        return route
 
     @router
     def cook(self,
@@ -180,7 +179,6 @@ class Session:
         else:
             canonical = False
 
-
         if reload_recipes:
             self._get_recipes()
 
@@ -191,7 +189,6 @@ class Session:
             recipe_name = None
         else:
             raise ValueError("recipe must be either str or dict")
-
 
         # use what's already in catalogue
         if use_from_catalogue and obj is None:
@@ -215,7 +212,6 @@ class Session:
         else:
             recipe_name = catalogue_name if catalogue_name else recipe_name
 
-
         try:
             plugin = recipe[self.g.conf.type_field]
         except KeyError:
@@ -228,7 +224,7 @@ class Session:
         mod, target_method = self.init_plugin(name, params)
         if all([req_method, target_method]):
             raise ValueError("Both recipe and plugin target contained a method request. Cannot resolve")
-        method = target_method if target_method else req_method # method defaults to None
+        method = target_method if target_method else req_method  # method defaults to None
         obj = self.run_plugin(mod, recipe, method=method, obj=obj, *args, **kwargs)
         if obj is not None:
             if add_to_catalogue:
@@ -322,4 +318,3 @@ class Session:
             return DataLoaderRecipe(function=args[0], **kwargs).model_dump()
         else:
             return {}
-
