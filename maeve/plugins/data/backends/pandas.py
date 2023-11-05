@@ -22,12 +22,12 @@ class PandasDataFrame:
 
     @staticmethod
     def apply_to_columns(
-                         df: pd.DataFrame,
-                         func: str,
-                         cols: Optional[Union[str, list[str]]] = None,
-                         *args,
-                         new_col: str = None,
-                         **kwargs) -> pd.DataFrame:
+            df: pd.DataFrame,
+            func: str,
+            cols: Optional[Union[str, list[str]]] = None,
+            *args,
+            new_col: str = None,
+            **kwargs) -> pd.DataFrame:
         """Apply a series function to 1 or more columns of a dataframe.
 
         Parameters
