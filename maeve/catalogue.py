@@ -1,14 +1,17 @@
-import pandas
-from pydantic import BaseModel
-from typing import Any, Optional, Literal, Union
-from maeve.util import DictUtils
-import re
 import hashlib
 import json
-from datetime import datetime
+import re
 import string
-from pandas.util import hash_pandas_object
 from copy import deepcopy
+from datetime import datetime
+from typing import Any, Optional, Literal
+
+import pandas
+from pandas.util import hash_pandas_object
+from pydantic import BaseModel
+
+from maeve.util import DictUtils
+
 
 class CatalogueItemModel(BaseModel):
     obj: Any
@@ -89,7 +92,6 @@ class Catalogue:
         self.hashes[item.obj_hash] = item
         return key
 
-
     def increment_name(self, name):
         try:
             n = int(re.match("_(\d+)$", name).groups()[0])
@@ -159,7 +161,7 @@ class Catalogue:
     def generate_metadata(self, metadata: dict = None):
         metadata = metadata if metadata else {}
         _metadata = {
-            "created" : datetime.now()
+            "created": datetime.now()
         }
         return {**metadata, **metadata}
 
