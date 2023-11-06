@@ -15,6 +15,7 @@ pydantic = "^2.0"
 polars = "^0.19"
 pyarrow = "^10.0"
 hjson = "^3.0"
+matplotlib = "^3.8.1"
 
 
 [build-system]
