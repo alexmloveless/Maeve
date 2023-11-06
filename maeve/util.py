@@ -1,3 +1,19 @@
+import copy
+import json
+import operator
+import random
+import re
+import string
+from collections import deque
+from datetime import datetime
+from functools import reduce
+from os import path, walk
+from typing import Union
+
+import hjson
+import pandas as pd
+from pydantic import ValidationError
+
 import maeve
 from maeve.models.core import (
     GlobalConst, AnchorConst, FuncRecipe, LogConst,
@@ -5,23 +21,8 @@ from maeve.models.core import (
 )
 from maeve.plugins.primitives import Primitives
 
-from pydantic import ValidationError
-
-import copy
-from os import path, walk
-import re
-import json
-import hjson
-from functools import reduce
-import operator
-from typing import Union
-from collections import deque
-from datetime import datetime
-import pandas as pd
-import random
-import string
-
 g = GlobalConst()
+
 
 class Logger:
     def __init__(
@@ -347,7 +348,6 @@ class FSUtils:
             raise RuntimeError(f"Invalid or malformed HJSON in file {f}")
 
 
-
 class AnchorUtils:
     ac = AnchorConst()
 
@@ -454,7 +454,7 @@ class FuncUtils:
                 return getattr(ns, recipe.function)
             except AttributeError:
                 return cls.handle_func_fail(recipe,
-                                           f"No known func called {recipe.function} in given namespace", ret=obj)
+                                            f"No known func called {recipe.function} in given namespace", ret=obj)
         if obj is not None:
             if recipe.namespace:
                 namespaces = [recipe.namespace]
@@ -505,7 +505,7 @@ class FuncUtils:
         except ValidationError:
             recipes = _recipes = recipe
 
-        if type(recipes) is dict:
+        if type(recipes) is dict:  # noqa: E721
             # keys are only there to help manage the order of funcs and facilitate merges
             recipes = recipes.values()
         else:
@@ -534,9 +534,9 @@ class FuncUtils:
 class RecipeUtils:
     @classmethod
     def add_package_recipes(cls,
-            loc: Union[list, dict, str],
-            load_package_recipes: list
-    ):
+                            loc: Union[list, dict, str],
+                            load_package_recipes: list
+                            ):
         if len(load_package_recipes) == 0:
             return loc
 
