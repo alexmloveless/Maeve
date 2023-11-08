@@ -14,7 +14,7 @@ class Function:
         self.s = session
 
     def main(self, recipe, obj=None):
-        return FuncUtils.run_func(recipe, obj=obj)
+        return FuncUtils.run_func_recipe(recipe, obj=obj)
 
 
 

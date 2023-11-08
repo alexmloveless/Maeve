@@ -1,6 +1,8 @@
 from maeve.models.core import Globals
 from .backends.pandas import PandasDataFrame
+from .backends.pandas import PandasSeries
 from .backends.polars import PolarsDataFrame
+from .backends.polars import PolarsSeries
 from maeve.models.core import DataLoaderRecipe
 from maeve.util import FuncUtils
 import pandas as pd
@@ -70,11 +72,11 @@ class DataFrame:
 @pl.api.register_series_namespace(g.core.datapackagestub)
 class Series:
 
-    def __init__(self, df):
-        self._df = df
-        self.df_info()
-        self.pandas = PandasDataFrame()
-        self.polars = PolarsDataFrame()
+    def __init__(self, series):
+        self._series = series
+        self.series_info()
+        self.pandas = PandasSeries()
+        self.polars = PolarsSeries()
 
     def mangle_columns(self):
         return self.backend_func("mangle_columns")
@@ -83,15 +85,15 @@ class Series:
         return self.backend_func("clean_str_to_float", *args, **kwargs)
 
     def backend_func(self, func, *args, **kwargs):
-        return getattr(getattr(self, self.backend), func)(self._df, *args, **kwargs)
+        return getattr(getattr(self, self.backend), func)(self._series, *args, **kwargs)
 
-    def df_info(self):
-        self.is_pd = True if type(self._df) is pd.core.series.Series else False
-        self.is_pl = True if type(self._df) is pl.series.series.Series else False
+    def series_info(self):
+        self.is_pd = True if type(self._series) is pd.core.series.Series else False
+        self.is_pl = True if type(self._series) is pl.series.series.Series else False
 
-        if type(self._df) is pd.core.series.Series:
+        if type(self._series) is pd.core.series.Series:
             self.backend = "pandas"
-        elif type(self._df) is pl.series.series.Series:
+        elif type(self._series) is pl.series.series.Series:
             self.backend = "polars"
         else:
             self.backend = None
@@ -106,7 +108,7 @@ class DataLoader:
             return obj
         recipe = DataLoaderRecipe(**recipe).model_dump()
         backend = self.get_backend(recipe["backend"])
-        return FuncUtils.run_func(
+        return FuncUtils.run_func_recipe(
             recipe,
             ns=backend
         )
