@@ -3,6 +3,8 @@ from pydantic import BaseModel, field_validator, conlist
 from typing import Optional, Union, Any
 import re
 
+from maeve.util import FuncUtils
+
 
 class PandasSlicerModel(BaseModel):
     index: Optional[Union[conlist(Union[int, str, None], min_length=1, max_length=3), str, int]] = None
@@ -25,9 +27,11 @@ class PandasDataFrame:
             df: pd.DataFrame,
             func: str,
             cols: Optional[Union[str, list[str]]] = None,
-            *args,
             new_col: str = None,
-            **kwargs) -> pd.DataFrame:
+            fail_silently=False,
+            *args,
+            **kwargs
+    ) -> pd.DataFrame:
         """Apply a series function to 1 or more columns of a dataframe.
 
         Parameters
@@ -48,15 +52,18 @@ class PandasDataFrame:
         -------
         pd.DataFrame
         """
-        func = getattr(PandasSeries, func)
         cols = cols if cols else list(df.columns)
         if new_col and type(cols) is str:
-            df[new_col] = func(df[cols], *args, **kwargs)
+            df[new_col] = FuncUtils.run_func(
+                func, df[cols], fail_silently=fail_silently, func_args=args, func_kwargs=kwargs
+            )
         else:
             cols = [cols] if type(cols) is str else cols
             if type(cols) is list:
                 for col in cols:
-                    df[col] = func(df[col], *args, **kwargs)
+                    df[col] = FuncUtils.run_func(
+                        func, df[col], fail_silently=fail_silently, func_args=args, func_kwargs=kwargs
+                    )
         return df
 
     @staticmethod

@@ -8,7 +8,7 @@ from collections import deque
 from datetime import datetime
 from functools import reduce
 from os import path, walk
-from typing import Union
+from typing import Union, Any
 
 import hjson
 import pandas as pd
@@ -416,8 +416,41 @@ class AnchorUtils:
 
 class FuncUtils:
 
+
     @classmethod
-    def run_func(
+    def run_func(cls,
+                 function: str,
+                 obj: Any = None,
+                 ns: Any = None,
+                 func_args=None,
+                 func_kwargs=None,
+                 fail_silently: bool = False,
+                 logger=None
+                 ):
+
+        func_args = func_args if func_args else []
+        func_kwargs = func_kwargs if func_kwargs else {}
+        if obj is not None:
+            # try and get the func from the obj namespace
+            try:
+                func = getattr(obj, function)
+            except AttributeError:
+                func = cls._try_namespaces(function, obj, ns=ns)
+
+            return cls._func(func, logger=logger, *func_args, **func_kwargs)
+        else:
+            try:
+                func = getattr(ns, function)
+            except AttributeError:
+                cls.handle_func_fail(
+                    f"No known func called {function}",
+                    function,
+                    fail_silently=fail_silently
+                )
+            return cls._func(func, logger=logger, *func_args, **func_kwargs)
+
+    @classmethod
+    def run_func_recipe(
             cls,
             recipe: Union[dict, FuncRecipe],
             obj=None,
@@ -429,35 +462,35 @@ class FuncUtils:
             If ns is not passed, all functions must
             exist in the object namespace
         """
-        if type(recipe) is dict:
+        if type(recipe) is dict:  # noqa: E721
             recipe = FuncRecipe(**recipe)
 
-        if obj is not None:
-            # try and get the func from the obj namespace
-            try:
-                func = getattr(obj, recipe.function)
-            except AttributeError:
-                func = cls._try_namespaces(recipe, obj, ns=ns)
+        ns = recipe.namespace if recipe.namespace else ns
 
-            return cls._func(func, recipe, logger)
-        else:
-            try:
-                func = getattr(ns, recipe.function)
-            except AttributeError:
-                cls.handle_func_fail(recipe, f"No known func called {recipe.function}")
-            return cls._func(func, recipe, logger)
+        args = recipe.args
+        kwargs = recipe.kwargs
+        return cls.run_func(
+            recipe.function,
+            func_args=args,
+            obj=obj,
+            ns=ns,
+            fail_silently=recipe.fail_silently,
+            logger=logger,
+            func_kwargs=kwargs
+        )
 
     @classmethod
-    def _try_namespaces(cls, recipe, obj, ns=None):
+    def _try_namespaces(cls, function: str, obj: Any, ns=None, fail_silently=False, logger=None):
         if ns:
             try:
-                return getattr(ns, recipe.function)
+                return getattr(ns, function)
             except AttributeError:
-                return cls.handle_func_fail(recipe,
-                                            f"No known func called {recipe.function} in given namespace", ret=obj)
+                return cls.handle_func_fail(
+                    f"No known func called {function} in given namespace",
+                    function, ret=obj, logger=logger)
         if obj is not None:
-            if recipe.namespace:
-                namespaces = [recipe.namespace]
+            if ns:
+                namespaces = [ns]
             else:
                 namespaces = g.func_namespaces
             for n in namespaces:
@@ -466,25 +499,31 @@ class FuncUtils:
                 except AttributeError:
                     continue
                 try:
-                    return getattr(_ns, recipe.function)
+                    return getattr(_ns, function)
                 except AttributeError:
                     continue
-        return cls.handle_func_fail(recipe, f"No known func called {recipe.function} in any namespace", ret=obj)
+        return cls.handle_func_fail(
+            f"No known func called {function} in any namespace",
+            function,
+            ret=obj,
+            fail_silently=fail_silently,
+            logger=logger
+        )
 
     @classmethod
-    def _func(cls, func, recipe, obj=None, logger=None):
+    def _func(cls, func, obj=None, logger=None, *args, **kwargs):
         try:
             if obj is None:
-                return func(*recipe.args, **recipe.kwargs)
+                return func(*args, **kwargs)
             else:
-                return func(obj, *recipe.args, **recipe.kwargs)
+                return func(obj, *args, **kwargs)
         except Exception as e:
-            return cls.handle_func_fail(recipe, e, logger=logger)
+            return cls.handle_func_fail(e, func, logger=logger)
 
     @staticmethod
-    def handle_func_fail(recipe, e, ret=None, logger=None):
-        message = f"Pipeline function {recipe.function} failed with error {e}"
-        if recipe.fail_silently:
+    def handle_func_fail(e, function, fail_silently: bool = False, ret=None, logger=None):
+        message = f"Pipeline function {function} failed with error {e}"
+        if fail_silently:
             if logger:
                 logger.info(message)
             else:
