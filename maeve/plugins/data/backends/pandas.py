@@ -89,8 +89,10 @@ class PandasDataFrame:
                               index: Optional[Any] = None,
                               replace_val: Optional[Any] = None,
                               replace_cols: Optional[Union[str, list]] = None,
+                              replace_qry: Optional[str] = None,
                               replace_index: Optional[Any] = None,
-                              multiplier: Optional[float] = None) -> pd.DataFrame:
+                              multiplier: Optional[float] = None,
+                              aggfunc: Optional[str] = None) -> pd.DataFrame:
         """Replace values with a scalar or values from another column.
 
         Parameters
@@ -99,8 +101,8 @@ class PandasDataFrame:
         change_cols: str or list of strings
             Column name to act on
         qry: str, optional
-            Query string to filter rows to be changed. If query is used, then it is automatically used as the replacement
-            index as well.
+            Query string to filter rows to be changed. Used as the replacement index if replace_qry or replace_index
+            not supplied.
         index: Any, optional
             Index value or slice to filter rows to be changed.
             This or qry must be entered. If both, qry will be used.
@@ -109,10 +111,14 @@ class PandasDataFrame:
             Overrides remaining parameters even if they are supplied.
         replace_cols: str or list of strings, optional
             Column or list of columns whose values will be used for replacement values
+        replace_qry: str, optional
+            Query string to filter rows to be used for replacement values.
         replace_index: Any, optional
             Index of the row or rows to be used for replacement values
         multiplier: float, optional
             Used to multiply the new column values by
+        aggfunc: str, optional
+            Aggregation function to be used on the replacement values
 
         Returns
         -------
@@ -130,9 +136,9 @@ class PandasDataFrame:
             replace_column_values(df, 'streams', index=574, replace_index=575, multiplier=2)
         """
 
-        # Query will override index even if supplied
         if qry:
-            index = replace_index = df.query(qry).index
+            index = df.query(qry).index
+            replace_index = df.query(replace_qry).index if replace_qry else index
         elif index:
             replace_index = index if not replace_index else replace_index
         else:
@@ -142,9 +148,15 @@ class PandasDataFrame:
         replace_cols = change_cols if not replace_cols else replace_cols
 
         # replace_val overrides replace_index, replace_cols and multiplier even if supplied
-        print(f'repl val {replace_val} cols {change_cols} qry {qry}')
         if replace_val is not None:
             df.loc[index, change_cols] = replace_val
+        elif aggfunc is not None:
+            df.loc[index, change_cols] = df.loc[replace_index, replace_cols].agg(aggfunc)
+        elif replace_index != index and type(index) in [slice, tuple, list]:
+            if multiplier is not None:
+                df.loc[index, change_cols] = df.loc[replace_index, replace_cols].values * multiplier
+            else:
+                df.loc[index, change_cols] = df.loc[replace_index, replace_cols].values
         else:
             if multiplier is not None:
                 df.loc[index, change_cols] = df.loc[replace_index, replace_cols] * multiplier
