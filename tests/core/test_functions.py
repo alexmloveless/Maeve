@@ -77,3 +77,26 @@ def test_apply_to_columns(std_maeve_init_kwargs):
     assert df.released_year.dtype == object
     df = df.mv.apply_to_columns("astype", 'released_month', new_col='released_month_str', dtype='str')
     assert df.released_month_str.dtype == object
+
+
+def test_repeat(std_maeve_init_kwargs):
+    s = Session(**std_maeve_init_kwargs)
+    update_rows = [
+        {
+            'change_cols': 'speechiness_%',
+            'index': [0, 1],
+            'replace_cols': 'liveness_%',
+            'replace_index': [2, 3],
+        },
+        {
+            'change_cols': 'speechiness_%',
+            'index': [2, 3],
+            'replace_val': 10,
+        },
+    ]
+    df = s.cook("TestLoadPandasCSVNoPipeline")
+    df = df.mv.repeat("replace_column_values", update_rows)
+    assert df.loc[0, 'speechiness_%'] == 31
+    assert df.loc[1, 'speechiness_%'] == 11
+    assert df.loc[2, 'speechiness_%'] == 10
+    assert df.loc[3, 'speechiness_%'] == 10

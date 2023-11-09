@@ -34,6 +34,9 @@ class DataFrame:
 
     applyc = apply_to_columns
 
+    def repeat(self, *args, **kwargs):
+        return self.backend_func("repeat", *args, **kwargs)
+
     def unspace_colnames(self, *args, **kwargs):
         return self.backend_func("unspace_colnames", *args, **kwargs)
 

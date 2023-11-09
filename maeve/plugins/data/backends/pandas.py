@@ -28,7 +28,7 @@ class PandasDataFrame:
             func: str,
             cols: Optional[Union[str, list[str]]] = None,
             new_col: str = None,
-            fail_silently=False,
+            fail_silently: bool = False,
             *args,
             **kwargs
     ) -> pd.DataFrame:
@@ -36,15 +36,19 @@ class PandasDataFrame:
 
         Parameters
         ----------
+        df: pd.DataFrame
         func: object (function)
             Any function that acts on a series (can supply native pandas by pd.Series.func)
-        df: pd.DataFrame
         cols: str or list of str
             The column(s) to act on
         args: arguments
             args of function being called
         new_col: str, optional, default None
             Name of the new column to be created with the new values
+        fail_silently: bool, default False
+            If True will log failure message and continue processing, otherwise will raise error
+        args:  arguments
+            args of function being called
         kwargs: keyword arguments
             kwargs of function being called
 
@@ -64,6 +68,36 @@ class PandasDataFrame:
                     df[col] = FuncUtils.run_func(
                         func, df[col], fail_silently=fail_silently, func_args=args, func_kwargs=kwargs
                     )
+        return df
+
+    @staticmethod
+    def repeat(df: pd.DataFrame,
+               func: str,
+               param_list: list,
+               fail_silently=False,
+               ) -> pd.DataFrame:
+        """Apply a function to a dataframe repeatedly using a list of parameters.
+
+        Parameters
+        ----------
+        df: pd.DataFrame
+        func: object (function)
+            Any function that acts on a dataframe (can supply native pandas function)
+        param_list: list of dicts
+            Each dictionary contains arguments as keyword pairs. Each dictionary in the list will be applied to the
+            dataframe.
+        fail_silently: bool, default False
+            If True will log failure message and continue processing, otherwise will raise error
+
+        Returns
+        -------
+        pd.DataFrame
+        """
+
+        for params in param_list:
+            df = FuncUtils.run_func(
+                func, df, fail_silently=fail_silently, func_kwargs=params
+            )
         return df
 
     @staticmethod
