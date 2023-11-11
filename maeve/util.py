@@ -511,7 +511,7 @@ class FuncUtils:
         )
 
     @classmethod
-    def _func(cls, func, obj=None, logger=None, *args, **kwargs):
+    def _func(cls, func, *args, obj=None, logger=None, **kwargs):
         try:
             if obj is None:
                 return func(*args, **kwargs)
