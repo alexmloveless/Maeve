@@ -41,12 +41,6 @@ class MplPlot:
         else:
             return self.subplots(**recipe)
 
-    def stackedbar(self, obj, subplots_kwargs=None, bar_kwargs=None):
-        fig, ax = self.subplots(**subplots_kwargs)
-        bar_kwargs = bar_kwargs if bar_kwargs else {}
-        ax.stackedbar(obj, **bar_kwargs)
-        return fig, ax
-
     def subplots(self,
                  flattenax: bool = True,
                  rcparams: dict = None,
@@ -73,6 +67,19 @@ class MplPlot:
 
     def __augment_ax(self, ax, data):
         return ax
+
+    ##############################################################################
+    # Canned plots
+    # These should be created in the following cases:
+    #  - Wrappers around projection methods for standalone plots returning fig/ax
+    #  - Plots with multiple parts (subplots)
+    ##############################################################################
+
+    def stackedbar(self, obj, subplots_kwargs=None, bar_kwargs=None):
+        fig, ax = self.subplots(**subplots_kwargs)
+        bar_kwargs = bar_kwargs if bar_kwargs else {}
+        ax.stackedbar(obj, **bar_kwargs)
+        return fig, ax
 
 
 class MPlotProjection(plt.Axes):
