@@ -3,7 +3,7 @@ from pydantic import BaseModel, field_validator, conlist
 from typing import Optional, Union, Any
 import re
 
-from maeve.util import FuncUtils
+from maeve.util.function import FuncUtils
 
 
 class PandasSlicerModel(BaseModel):

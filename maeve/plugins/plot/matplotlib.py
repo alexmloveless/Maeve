@@ -3,6 +3,10 @@ import matplotlib.pyplot as plt
 import matplotlib.projections as proj
 import numpy as np
 from typing import Any, Union
+from matplotlib.dates import DateFormatter
+from matplotlib import ticker
+
+from maeve.util.dates import Dates
 
 
 class Subplots:
@@ -83,6 +87,38 @@ class MPlotProjection(plt.Axes):
             else:
                 self.bar(c[1].index, c[1], bottom=cols, label=c[0], **kwargs)
                 cols = cols + c[1]
+
+    def format_ticklabels(self, which='x', kind='int', date_format=None):
+        if which == 'x':
+            axis = self.xaxis
+        else:
+            axis = self.yaxis
+
+        if kind == 'date':
+            if not date_format:
+                date_format = self.profile["dateformat"]["default"]
+            axis.set_major_formatter(DateFormatter(date_format))
+        else:
+            axis.set_major_formatter(self.get_text_formatter(kind))
+
+    def get_text_formatter(self, format):
+        fmt = {
+            "dollars": Dates.dollars_format,
+            "$": Dates.dollars_format,
+            "pounds": Dates.pounds_format,
+            "£": Dates.pounds_format,
+            "percent": ticker.PercentFormatter(),
+            "%": ticker.PercentFormatter(),
+            "perc": ticker.PercentFormatter(),
+            "pct": ticker.PercentFormatter()
+        }
+        return fmt.get(format, Dates.number_format)
+
+    def format_xticklabels(self, **kwargs):
+        self.format_ticklabels(which="x", **kwargs)
+
+    def format_yticklabels(self, **kwargs):
+        self.format_ticklabels(which="y", **kwargs)
 
 
 proj.register_projection(MPlotProjection)

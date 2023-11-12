@@ -10,7 +10,7 @@ import pandas
 from pandas.util import hash_pandas_object
 from pydantic import BaseModel
 
-from maeve.util import DictUtils
+from maeve.util.dict import DictUtils
 
 
 class CatalogueItemModel(BaseModel):
