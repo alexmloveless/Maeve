@@ -1,6 +1,5 @@
 import pytest
 from maeve.models.core import GlobalConst
-from maeve import Session
 import json
 
 g = GlobalConst()

@@ -8,7 +8,9 @@ from maeve.conf import Confscade
 from maeve.models.core import Globals, OrgConf, EnvConf, PluginParams, ModelInfo, DataLoaderRecipe
 from maeve.plugins import Plugins
 from maeve.plugins.data.extensions import Data
-from maeve.util import Logger, RecipeUtils, DictUtils
+from maeve.util.dict import DictUtils
+from maeve.util.log import Logger
+from maeve.util.recipe import RecipeUtils
 
 
 class Session:

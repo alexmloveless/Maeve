@@ -4,7 +4,7 @@ from .backends.pandas import PandasSeries
 from .backends.polars import PolarsDataFrame
 from .backends.polars import PolarsSeries
 from maeve.models.core import DataLoaderRecipe
-from maeve.util import FuncUtils
+from maeve.util.function import FuncUtils
 import pandas as pd
 import polars as pl
 import importlib

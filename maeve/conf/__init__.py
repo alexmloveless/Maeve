@@ -1,11 +1,12 @@
-from maeve.util import Logger
-from maeve.util import FSUtils, DictUtils, AnchorUtils
+from maeve.util.log import Logger
+from maeve.util.os import FSUtils
+from maeve.util.dict import DictUtils
+from maeve.util.recipe import AnchorUtils
 from maeve.models.core import ConfscadeDefaults, GlobalConst, EnvConf
 
 from datetime import datetime
 import json
 from os import path, listdir
-import logging
 import re
 
 from typing import Union, Optional
