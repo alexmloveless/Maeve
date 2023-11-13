@@ -74,7 +74,16 @@ def test_read_csv(std_maeve_init_kwargs, test_data_path):
     assert type(df) is pd.core.frame.DataFrame
 
 
-#def test_pandas_load_timeseries(std_maeve_init_kwargs):
-#    s = Session(**std_maeve_init_kwargs)
-#    df = s.cook("TestCSVTimeSeriesTempsLoad")
+def test_pandas_load_timeseries(std_maeve_init_kwargs):
+    s = Session(**std_maeve_init_kwargs)
+    df = s.cook("TestCSVTimeSeriesTempsLoad")
+    assert df.loc['1990-12-31', 'Daily minimum temperatures'] == '13'
 
+
+def test_pandas_timeseries_add_data(std_maeve_init_kwargs):
+    s = Session(**std_maeve_init_kwargs)
+    df = s.cook("TestTimeSeriesAddData")
+    assert df.loc['1990-12-31', 'Daily minimum temperatures'] == '13'
+    assert pd.isnull(df.loc['1991-01-01', 'Daily minimum temperatures'])
+    assert pd.isnull(df.loc['1990-12-01', 'Daily maximum temperatures'])
+    assert df.loc['1991-01-01', 'Daily maximum temperatures'] == 13.6

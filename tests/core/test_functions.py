@@ -100,3 +100,19 @@ def test_repeat(std_maeve_init_kwargs):
     assert df.loc[1, 'speechiness_%'] == 11
     assert df.loc[2, 'speechiness_%'] == 10
     assert df.loc[3, 'speechiness_%'] == 10
+
+
+def test_add_rows(std_maeve_init_kwargs):
+    s = Session(**std_maeve_init_kwargs)
+    data = {'1991-01-02': 10, '1991-01-01': 12.4}
+    df = s.cook("TestCSVTimeSeriesTempsLoad")
+    df1 = df.mv.add_rows(data, set_idx_as_date=True, sort_index=True, columns=None)
+    assert df1.loc['1991-01-01', 'Daily minimum temperatures'] == 12.4
+    assert df1.loc['1991-01-02', 'Daily minimum temperatures'] == 10
+    assert df1.iloc[-1, -1] == 10
+
+    df2 = df.mv.add_rows(data, set_idx_as_date=True, sort_index=True,
+                         columns=['Daily maximum temperatures'])
+    assert pd.isnull(df2.loc['1991-01-01', 'Daily minimum temperatures'])
+    assert pd.isnull(df2.loc['1990-12-01', 'Daily maximum temperatures'])
+    assert df2.loc['1991-01-01', 'Daily maximum temperatures'] == 12.4

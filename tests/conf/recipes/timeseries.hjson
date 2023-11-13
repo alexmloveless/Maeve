@@ -14,5 +14,25 @@
     "pipeline": {
       "load_data": "@TestCSVTimeSeriesTempsLoader",
     }
+  },
+
+  //  Add extra data
+  "TestTimeSeriesAddData": {
+    "recipe_type": "pipeline",
+    "pipeline": {
+      "load_data": "TestCSVTimeSeriesTempsLoader",
+      "add_data": {
+        "function": "add_rows",
+        "args": [
+          {
+            '1991-01-02': 14,
+            '1991-01-01': 13.6
+          },
+        ],
+        "kwargs": {
+          "columns": ['Daily maximum temperatures']
+        }
+      }
+    }
   }
 }

@@ -199,6 +199,44 @@ class PandasDataFrame:
 
         return df
 
+    @staticmethod
+    def add_rows(df: pd.DataFrame,
+                 new_data: dict,
+                 set_idx_as_date: Optional[bool] = True,
+                 sort_index: Optional[bool] = True,
+                 columns: Optional[list] = None) -> pd.DataFrame:
+        """ Add rows a to a dataframe.
+        Primarily for adding missing dates into an aggregated dataframe by date.
+        Construct a dataframe of new rows and return the concatenated dataframe.
+
+        Parameters
+        ----------
+        df: dataframe
+        new_data: dict
+            Defined as row_index:["col1_val", "col2_val" ...]
+        set_idx_as_date: bool
+            Convert index values to datetime prior to using as indices
+        sort_index: bool
+            Sort the df by index before returning
+        columns: list or None
+            The column names for the new data. The default is to use the columns from the main df.
+            If you use different column names this will create a new columns
+            with Null values for those cols in the existing df
+
+        Returns
+        -------
+        pd.DataFrame
+        """
+        columns = columns if columns else df.columns
+        new = pd.DataFrame.from_dict(new_data, columns=columns, orient="index")
+        if set_idx_as_date:
+            new.index = pd.to_datetime(new.index)
+        df = pd.concat([df, new])
+        if sort_index:
+            return df.sort_index()
+        else:
+            return df
+
     def loc_slice(self, df, index=None, columns=None):
         mod = PandasSlicerModel(index=index, columns=columns)
         return df.loc[mod.index, mod.columns]
