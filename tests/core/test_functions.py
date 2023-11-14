@@ -2,6 +2,7 @@ import pytest
 from tests.global_fixtures import std_maeve_init_kwargs, test_data_path
 from maeve import Session
 import pandas as pd
+import numpy as np
 from os import path
 
 
@@ -116,3 +117,20 @@ def test_add_rows(std_maeve_init_kwargs):
     assert pd.isnull(df2.loc['1991-01-01', 'Daily minimum temperatures'])
     assert pd.isnull(df2.loc['1990-12-01', 'Daily maximum temperatures'])
     assert df2.loc['1991-01-01', 'Daily maximum temperatures'] == 12.4
+
+
+def test_id_to_str(std_maeve_init_kwargs):
+    s = Session(**std_maeve_init_kwargs)
+    df = s.data.DataFrame({'vals': [np.nan, 1000, 17],
+                           'vals1': [27, 1025, 0],
+                           'vals2': [27, 1025.0, '0123']})
+    df.mv.apply_to_columns("id_to_str", ['vals', 'vals1', 'vals2'], strip_lead_zero=True)
+    assert df.loc[0, 'vals'] == ''
+    assert df.loc[1, 'vals'] == '1000'
+    assert df.loc[0, 'vals1'] == '27'
+    assert df.loc[2, 'vals2'] == '123'
+    df = s.data.DataFrame({'vals': [np.nan, 1000, 17],
+                           'vals1': [27, 1025, 0],
+                           'vals2': [27, 1025.0, '0123']})
+    df.mv.apply_to_columns("id_to_str", 'vals', fill_val='0')
+    assert df.loc[0, 'vals'] == '0'
