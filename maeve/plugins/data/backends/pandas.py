@@ -280,3 +280,40 @@ class PandasSeries:
         series = series.str.replace(r'^-$', '0', regex=True)
         series = series.apply(lambda x: -float(x.strip('()')) if '(' in x else float(x))
         return series
+
+    @staticmethod
+    def id_to_str(series: pd.Series,
+                  strip_lead_zero: bool = False,
+                  fill_val: Union[str, int] = 0) -> pd.Series:
+        """Reformat a numerical series as string for use as an ID.
+
+        Parameters
+        ----------
+        series: pd.Series
+            Data to be converted
+        strip_lead_zero: bool
+            Whether to strip off leading zeros. Default is False
+        fill_val: str or int, default 0
+            Fill value for nans.
+
+        Returns
+        -------
+        pd.Series with reformatted data as string:
+            nan becomes '' when col starting as a float
+        """
+        series = series.fillna(fill_val)
+        if series.dtype == 'O':
+            # need to do this elementwise
+            series = pd.Series([str(int(i)) if type(i) is float else str(i) for i in series])
+
+        else:
+            # Need to convert float to int first
+            if series.dtype == 'float64':
+                series = series.fillna(fill_val).astype(int)
+
+            series = series.astype(str)
+        if strip_lead_zero:
+            series = series.str.lstrip('0')
+
+        return series
+

@@ -90,6 +90,9 @@ class Series:
     def clean_str_to_float(self, *args, **kwargs):
         return self.backend_func("clean_str_to_float", *args, **kwargs)
 
+    def id_to_str(self, *args, **kwargs):
+        return self.backend_func("id_to_str", *args, **kwargs)
+
     def backend_func(self, func, *args, **kwargs):
         return getattr(getattr(self, self.backend), func)(self._series, *args, **kwargs)
 
