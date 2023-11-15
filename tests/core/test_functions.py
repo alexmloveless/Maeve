@@ -134,3 +134,15 @@ def test_id_to_str(std_maeve_init_kwargs):
                            'vals2': [27, 1025.0, '0123']})
     df.mv.apply_to_columns("id_to_str", 'vals', fill_val='0')
     assert df.loc[0, 'vals'] == '0'
+
+
+def test_del_rows_after_val(std_maeve_init_kwargs):
+    s = Session(**std_maeve_init_kwargs)
+    df = s.cook("TestLoadPandasCSVNoPipeline")
+    df1 = df.mv.del_rows_after_val("track_name", 'En La De Ella')
+    assert df1.shape == (951, 24)
+    assert df1.iloc[-1, 0] == 'A Veces (feat. Feid)'
+    df2 = df.mv.del_rows_after_val(0, 'En La De Ella')
+    assert df2.shape == (951, 24)
+    assert df2.iloc[-1, 0] == 'A Veces (feat. Feid)'
+
