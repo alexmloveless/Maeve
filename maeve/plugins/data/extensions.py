@@ -46,6 +46,9 @@ class DataFrame:
     def add_rows(self, *args, **kwargs):
         return self.backend_func("add_rows", *args, **kwargs)
 
+    def del_rows_after_val(self, *args, **kwargs):
+        return self.backend_func("del_rows_after_val", *args, **kwargs)
+
     def recipe(self, df, recipe, session, **kwargs):
         return session.cook(recipe, obj=df, **kwargs)
 

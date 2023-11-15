@@ -18,6 +18,11 @@ class PandasSlicerModel(BaseModel):
         return slice(*v)
 
 
+class DeleteRowsModel(BaseModel):
+    query_val: Any
+    column: Union[int, str]
+
+
 class PandasDataFrame:
     def __init__(self):
         pass
@@ -236,6 +241,41 @@ class PandasDataFrame:
             return df.sort_index()
         else:
             return df
+
+    @staticmethod
+    def del_rows_after_val(df: pd.DataFrame,
+                           column: Union[int, str],
+                           query_val: Any) -> pd.DataFrame:
+        """Truncates df from a row with a specific value for a column
+
+        The deletion is inclusive of the row containing the value.
+
+        Parameters
+        ----------
+        df: pd.DataFrame
+        column: int or str
+            Column identifier (label or index) used to compare with value above. This row and those after are removed.
+        query_val: Any
+            Value that the column is equal to get the index (this row and those after removed)
+
+        Returns
+        -------
+        pd.DataFrame
+        """
+        mod = DeleteRowsModel(query_val=query_val, column=column)
+        if type(column) is int:
+            n = df.index[df.iloc[:, column] == query_val]
+        elif type(column) is str:
+            n = df.index[df[column] == query_val]
+        else:
+            return df
+
+        if len(n) > 1:
+            raise KeyError(f"More than one index with value {query_val}")
+        if len(n) == 0:
+            raise KeyError(f"No indexes found with value {query_val}")
+
+        return df[:n[0]]
 
     def loc_slice(self, df, index=None, columns=None):
         mod = PandasSlicerModel(index=index, columns=columns)
