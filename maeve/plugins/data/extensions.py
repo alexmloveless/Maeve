@@ -3,8 +3,9 @@ from .backends.pandas import PandasDataFrame
 from .backends.pandas import PandasSeries
 from .backends.polars import PolarsDataFrame
 from .backends.polars import PolarsSeries
-from maeve.models.core import DataLoaderRecipe
+from maeve.models.core import DataLoaderRecipe, FileMergeDataLoaderRecipe, FileConcatDataLoaderRecipe
 from maeve.util.function import FuncUtils
+from maeve.util.os import FSUtils as fs
 import pandas as pd
 import polars as pl
 import importlib
@@ -115,7 +116,7 @@ class DataLoader:
     def __init__(self, session):
         self.s = session
 
-    def main(self, recipe, obj=None):
+    def load(self, recipe, obj=None):
         if obj is not None:
             return obj
         recipe = DataLoaderRecipe(**recipe).model_dump()
@@ -124,6 +125,34 @@ class DataLoader:
             recipe,
             ns=backend
         )
+
+    main = load
+
+    def get_files_from_recipe(self, recipe):
+        return fs.os_walk_and_filter(
+            recipe["location"],
+            fileregex=recipe["file_regex"],
+            dirregex=recipe["dir_regex"]
+        )
+
+    def load_files_from_recipe(self, recipe):
+        files = self.get_files_from_recipe(recipe)
+        dfs = []
+        for f in files:
+            r = DataLoaderRecipe(
+                location=f,
+                backend=recipe["backend"]
+            )
+            dfs.append(self.load(r))
+        return dfs
+
+    def load_files_concat(self, recipe):
+        recipe = FileConcatDataLoaderRecipe(**recipe).model_dump()
+        files = self.get_files_from_recipe(recipe)
+        return pd.concat(files, **recipe["concat_kwargs"])
+
+    def load_files_merge(self, recipe):
+        pass
 
     @staticmethod
     def get_backend(backend):

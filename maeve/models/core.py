@@ -217,6 +217,22 @@ class DataLoaderRecipe(FuncRecipe):
         return self
 
 
+class FileDataLoaderRecipe(DataLoaderRecipe):
+    location: Union[str, LocationRecipe]
+    action: str  # concat, return listy etv.
+    file_regex: Optional[str] = None
+    dir_regex: Optional[str] = None
+    fail_mode: Union[Literal["except"], Literal["ignore"]]
+
+
+class FileMergeDataLoaderRecipe(FileDataLoaderRecipe):
+    merge_kwargs: dict = {}
+
+
+class FileConcatDataLoaderRecipe(FileDataLoaderRecipe):
+    concat_kwargs: dict = {}
+
+
 class LocationRecipe(BaseModel):
     recipe_type: Literal["location"] = "location"
     use_path: Optional[str] = None
