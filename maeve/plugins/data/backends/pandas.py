@@ -1,4 +1,5 @@
 import pandas as pd
+import numpy as np
 from pydantic import BaseModel, field_validator, conlist
 from typing import Optional, Union, Any
 import re
@@ -357,3 +358,43 @@ class PandasSeries:
 
         return series
 
+
+class PandasUtils:
+
+
+    @staticmethod
+    def df_to_series(df):
+        """If df is a DataFrame return the first column as a series , otherwise just return as is"""
+        if type(df) is pd.core.frame.DataFrame:
+            return df.iloc[:, 0]
+        return df
+
+
+    @staticmethod
+    def dataframe_truth(df):
+        """
+        Test is a variable is a dataframe/series or otherwise not False
+        Useful if you want to know if a variable that might contain a df evals True
+        """
+        if type(df) in (pd.core.frame.DataFrame, pd.core.series.Series):
+            return True
+        elif type(df) == np.ndarray:
+            if len(df) > 0:
+                return True
+        else:
+            if df:
+                return True
+            else:
+                return False
+
+
+    @staticmethod
+    def df_arg_truth(val):
+        """
+        Returns true if val is either a pd.DataFrame or pd.Series, otherwise returns false.
+        handy of you want to check if incoming function args are valid pandas objects and avoid the "ambiguous truth" error
+        """
+        if type(val) in (pd.core.frame.DataFrame, pd.core.series.Series):
+            return True
+        else:
+            return False

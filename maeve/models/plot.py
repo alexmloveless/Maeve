@@ -26,6 +26,7 @@ class MplSubplotsModel(BaseModel):
         del self.recipe_type
         return self
 
+
 class MplPlotModel(BaseModel):
     recipe_type: Literal["mpl_plot"]
     plot_type: Optional[str] = None
@@ -37,3 +38,5 @@ class MplPlotModel(BaseModel):
     def rm_recipe_type(self):
         del self.recipe_type
         return self
+
+
