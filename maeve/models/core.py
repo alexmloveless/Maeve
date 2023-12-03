@@ -135,9 +135,14 @@ class Globals:
 ###############################
 #  Mutable models
 ###############################
+
+class OrgConfPlugins(BaseModel):
+    plot: dict = {}
+
 class OrgConf(BaseModel):
     org_name: str = None
     org_defaults: dict = {}
+    plugins: Optional[OrgConfPlugins] = OrgConfPlugins()
 
 
 class EnvConf(BaseModel):
