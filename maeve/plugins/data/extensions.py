@@ -1,9 +1,10 @@
+import maeve
 from maeve.models.core import Globals
 from .backends.pandas import PandasDataFrame
 from .backends.pandas import PandasSeries
 from .backends.polars import PolarsDataFrame
 from .backends.polars import PolarsSeries
-from maeve.models.core import DataLoaderRecipe, FileMergeDataLoaderRecipe, FileConcatDataLoaderRecipe
+from maeve.models.core import DataLoaderRecipe, FileConcatDataLoaderRecipe
 from maeve.util.function import FuncUtils
 from maeve.util.os import FSUtils as fs
 import pandas as pd
@@ -22,6 +23,10 @@ class DataFrame:
         self.df_info()
         self.pandas = PandasDataFrame()
         self.polars = PolarsDataFrame()
+        # placeholder for the session since we won't see it until this passes through the cook function again
+        # This is cos the extensions are initialised in the Dataframe creation process which isn't visible to
+        # Maeve. So we stick it in later
+        self.s = None
 
     #########################################################
     # Functions
@@ -77,6 +82,15 @@ class DataFrame:
         else:
             self.backend = None
 
+    def set_session(self, session, override=False):
+        # if not isinstance(session, maeve.Session):
+        #     return
+        if (self.s and override) or not self.s:
+            self.s = session
+            self.pandas.s = session
+            self.polars.s = session
+
+
 
 @pd.api.extensions.register_series_accessor(g.core.datapackagestub)
 @pl.api.register_series_namespace(g.core.datapackagestub)
@@ -87,6 +101,7 @@ class Series:
         self.series_info()
         self.pandas = PandasSeries()
         self.polars = PolarsSeries()
+        self.s = None
 
     def mangle_columns(self):
         return self.backend_func("mangle_columns")
@@ -111,11 +126,35 @@ class Series:
         else:
             self.backend = None
 
+    def set_session(self, session, override=False):
+        # if not isinstance(session, maeve.Session):
+        #     return
+        if (self.s and override) or not self.s:
+            self.s = session
+            self.pandas.s = session
+            self.polars.s = session
+
 
 class DataLoader:
     def __init__(self, session):
         self.s = session
 
+    def _add_session_to_df(self, df):
+        getattr(df, g.core.datapackagestub).set_session(self.s)
+
+    def add_session(func):
+        def wrapper(self, *args, **kwargs):
+            ret = func(self, *args, **kwargs)
+            if isinstance(ret, list):
+                for df in ret:
+                    self._add_session_to_df(df)
+            else:
+                self._add_session_to_df(ret)
+            return ret
+        return wrapper
+
+
+    @add_session
     def load(self, recipe, obj=None):
         if obj is not None:
             return obj
@@ -128,6 +167,7 @@ class DataLoader:
 
     main = load
 
+    @add_session
     def get_files_from_recipe(self, recipe):
         return fs.os_walk_and_filter(
             recipe["location"],
@@ -135,6 +175,7 @@ class DataLoader:
             dirregex=recipe["dir_regex"]
         )
 
+    @add_session
     def load_files_from_recipe(self, recipe):
         files = self.get_files_from_recipe(recipe)
         dfs = []
@@ -146,11 +187,13 @@ class DataLoader:
             dfs.append(self.load(r))
         return dfs
 
+    @add_session
     def load_files_concat(self, recipe):
         recipe = FileConcatDataLoaderRecipe(**recipe).model_dump()
         files = self.get_files_from_recipe(recipe)
         return pd.concat(files, **recipe["concat_kwargs"])
 
+    @add_session
     def load_files_merge(self, recipe):
         pass
 

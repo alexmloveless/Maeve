@@ -142,7 +142,6 @@ class MPlotProjection(plt.Axes):
     def ts(self,
            data,
            kind="line",
-           profile='ts',
            add_all_events=False,
            add_xmas=False,
            add_yearend=False,

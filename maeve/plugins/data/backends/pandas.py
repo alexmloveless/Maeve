@@ -25,8 +25,8 @@ class DeleteRowsModel(BaseModel):
 
 
 class PandasDataFrame:
-    def __init__(self):
-        pass
+    def __init__(self, session=None):
+        self.s = session
 
     @staticmethod
     def apply_to_columns(
@@ -288,8 +288,8 @@ class PandasDataFrame:
 
 
 class PandasSeries:
-    def __init__(self):
-        pass
+    def __init__(self, session=None):
+        self.s = session
 
     @staticmethod
     def clean_str_to_float(series: pd.Series,
