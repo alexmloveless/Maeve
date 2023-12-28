@@ -11,7 +11,7 @@ from matplotlib import ticker
 from matplotlib.dates import date2num, num2date
 import pandas as pd
 from itertools import zip_longest
-from maeve.util.dates import Dates
+from maeve.util.string import String
 
 
 class Subplots:
@@ -121,16 +121,16 @@ class MPlotProjection(plt.Axes):
 
     def get_text_formatter(self, format):
         fmt = {
-            "dollars": Dates.dollars_format,
-            "$": Dates.dollars_format,
-            "pounds": Dates.pounds_format,
-            "£": Dates.pounds_format,
+            "dollars": String.dollars_format,
+            "$": String.dollars_format,
+            "pounds": String.pounds_format,
+            "£": String.pounds_format,
             "percent": ticker.PercentFormatter(),
             "%": ticker.PercentFormatter(),
             "perc": ticker.PercentFormatter(),
             "pct": ticker.PercentFormatter()
         }
-        return fmt.get(format, Dates.number_format)
+        return fmt.get(format, String.number_format)
 
     def format_xticklabels(self, **kwargs):
         self.format_ticklabels(which="x", **kwargs)
