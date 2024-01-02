@@ -19,6 +19,7 @@ class MplSubplotsModel(BaseModel):
     rcparams: dict = {}
     flattenax: bool = True
     as_obj: bool = False
+    subplots_kwargs: dict = {}
     subplot_kw: Optional[MplSubplotkwModel] = MplSubplotkwModel()
 
     @model_validator(mode="after")
