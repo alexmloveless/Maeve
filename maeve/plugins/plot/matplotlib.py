@@ -51,10 +51,13 @@ class MplPlot:
                  rcparams: dict = None,
                  merge_rc: bool = True,
                  as_obj: bool = False,
-                 **kwargs
+                 subplots_kwargs: dict = None,
+                 subplot_kw: dict = None
                  ) -> Union[Subplots, tuple]:
         mpl_conf = self.s.r.org.plugins.plot.get("matplotlib", {})
         base_rc = mpl_conf.get("rcparams", {})
+        subplots_kwargs = subplots_kwargs if subplots_kwargs else {}
+        subplot_kw = subplot_kw if subplot_kw else {}
         if rcparams:
             if merge_rc:
                 rcparams = DictUtils.mergedicts(base_rc, rcparams)
@@ -62,7 +65,7 @@ class MplPlot:
             rcparams = base_rc
 
         with plt.rc_context(rcparams):
-            fig, ax = plt.subplots(**kwargs)
+            fig, ax = plt.subplots(**subplots_kwargs, subplot_kw=subplot_kw)
             data = None
             if type(ax) is np.ndarray:
                 axs = ax.flatten()
