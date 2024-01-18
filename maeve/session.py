@@ -76,6 +76,7 @@ class Session:
         self._get_recipes()
 
         self.data = Data()
+        self.plugins = Plugins(self)
 
     def _get_recipes(self, loc: Union[str, list] = None):
         if not loc:
@@ -222,12 +223,7 @@ class Session:
             plugin = ModelInfo.identify_model(recipe, log=self.log)
 
         params = recipe.get(self.g.conf.init_params_field, {})
-        name, req_method = self.parse_plugin_name(plugin)
-        mod, target_method = self.init_plugin(name, params)
-        if all([req_method, target_method]):
-            raise ValueError("Both recipe and plugin target contained a method request. Cannot resolve")
-        method = target_method if target_method else req_method  # method defaults to None
-        obj = self.run_plugin(mod, recipe, method=method, obj=obj, *args, **kwargs)
+        obj = self.plugins.get_and_run_plugin(plugin, recipe, params=params, obj=obj, *args, **kwargs)
         if obj is not None:
             if add_to_catalogue:
                 cm = catalogue_metadata if catalogue_metadata else {"metadata": {}}
@@ -245,48 +241,6 @@ class Session:
 
             if return_obj:
                 return obj
-
-    def init_plugin(
-            self,
-            plugin: Union[str, list],
-            params: dict = None
-    ):
-        params = params if params else {}
-        params = PluginParams(**params)
-        cls, method = self.find_plugin(plugin)
-        return cls(self, *params.class_args, **params.class_kwargs), method
-
-    def run_plugin(self, mod, recipe, method: str = None, *args, **kwargs):
-        if not method:
-            method = self.g.conf.plugin_default_entrypoint
-        return getattr(mod, method)(recipe, *args, **kwargs)
-
-    def parse_plugin_name(self, name):
-        parts = re.split(self.g.conf.plugin_delim, name)
-        try:
-            return parts[0], parts[1]
-        except IndexError:
-            return parts[0], None
-
-    def find_plugin(self, plugin: Union[str, list, tuple]):
-        if type(plugin) is str:
-            bundled_plugin, cls, method = Plugins.resolve_plugin(plugin)
-            if bundled_plugin:
-                # see if it's a bundled plugin
-                self.log.debug(f"Found bundled plugin {bundled_plugin} attempting to import via {__name__}")
-                mod = importlib.import_module(bundled_plugin)
-                return getattr(mod, cls), method
-            else:
-                try:
-                    # otherwise try and import from system
-                    self.log.debug(f"Attempting to fetch 3rd party plugin {plugin}")
-                    mod = importlib.import_module(plugin)
-                except ModuleNotFoundError:
-                    # give up
-                    raise ValueError(f"No plugin found with name {plugin}")
-                return getattr(mod, plugin), None
-        else:
-            raise TypeError(f"Invalid type {type(plugin)} passed for plugin")
 
     def cook_from_list(self, recipes, *args, **kwargs):
         objs = []
