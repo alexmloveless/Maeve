@@ -15,6 +15,8 @@ class MplSubplotkwModel(BaseModel):
 
 
 class MplSubplotsModel(BaseModel):
+    nrows: int = 1
+    ncols: int = 1
     recipe_type: Literal["mpl_subplots"] = "mpl_subplots"
     rcparams: dict = {}
     flattenax: bool = True

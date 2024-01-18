@@ -20,12 +20,13 @@ class Plugins:
         }
 
         self.__plugin_map = {
+            # plugin loc, Class, default method, method expects recipe
             "Primitives": (f"{self.s.g.core.package_name}.plugins.primitives", "Primitives", "main"),
             "Pipeline": (f"{self.s.g.core.package_name}.plugins.core", "Pipeline", "main"),
             "Function": (f"{self.s.g.core.package_name}.plugins.core", "Function", "main"),
             "DataLoader": (f"{self.s.g.core.package_name}.plugins.data.extensions", "DataLoader", "main"),
             "MplSubPlot": (f"{self.s.g.core.package_name}.plugins.plot.matplotlib", "MplPlot", "main"),
-            "MplPlot": (f"{self.s.g.core.package_name}.plugins.plot.matplotlib", "MplPlot", "plot")
+            "MplPlot": (f"{self.s.g.core.package_name}.plugins.plot.matplotlib", "MplPlot", "mplot")
         }
 
     def get_plugin(
@@ -35,6 +36,7 @@ class Plugins:
             init=True
     ):
         name, req_method = self.parse_plugin_name(plugin)
+        params = params if params else {}
         params = PluginParams(**params)
         cls, target_method = self.find_plugin(plugin)
         if all([req_method, target_method]):
@@ -52,10 +54,15 @@ class Plugins:
             recipe=None,
             obj=None,
             params=None,
+            method: str = None,
             *args, **kwargs
     ):
-        mod, method = self.get_plugin(plugin, params)
+        mod, method_ = self.get_plugin(plugin, params)
+        if not method:
+            method = method_
         return self.run_plugin_method(mod, recipe=recipe, method=method, obj=obj, *args, **kwargs)
+
+    run = get_and_run_plugin
 
     def resolve_plugin(self, plugin):
         return self.__plugin_map.get(self.__plugin_alias.get(plugin, None), (None, None, None))
