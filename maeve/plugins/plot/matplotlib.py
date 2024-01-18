@@ -28,7 +28,7 @@ class MplPlot:
         recipe = MplSubplotsModel(**recipe).model_dump()
         return self.subplots(**recipe)
 
-    def plot(self, recipe: dict, obj: Any = None) -> tuple:
+    def mplot(self, recipe: dict, obj: Any = None) -> tuple:
         recipe = MplPlotModel(**recipe).model_dump()
         if recipe["plot_type"]:
             plot_type = recipe["plot_type"]
@@ -47,6 +47,8 @@ class MplPlot:
             return self.subplots(**recipe["subplots_kwargs"])
 
     def subplots(self,
+                 nrows: int = 1,
+                 ncols: int = 1,
                  flattenax: bool = True,
                  rcparams: dict = None,
                  merge_rc: bool = True,
@@ -65,7 +67,7 @@ class MplPlot:
             rcparams = base_rc
 
         with plt.rc_context(rcparams):
-            fig, ax = plt.subplots(**subplots_kwargs, subplot_kw=subplot_kw)
+            fig, ax = plt.subplots(nrows, ncols, **subplots_kwargs, subplot_kw=subplot_kw)
             data = None
             if type(ax) is np.ndarray:
                 axs = ax.flatten()
@@ -140,7 +142,6 @@ class MPlotProjection(plt.Axes):
 
     def format_yticklabels(self, **kwargs):
         self.format_ticklabels(which="y", **kwargs)
-
 
     def ts(self,
            data,
@@ -359,7 +360,6 @@ class MPlotProjection(plt.Axes):
                 xmax=maxdate,
                 add_lines=add_lines
             )
-
 
     def ts_add_tendline(self, fmt=None):
         from numpy.linalg import LinAlgError
