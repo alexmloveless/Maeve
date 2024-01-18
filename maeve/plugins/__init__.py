@@ -49,21 +49,24 @@ class Plugins:
     def get_and_run_plugin(
             self,
             plugin,
-            recipe,
+            recipe=None,
             obj=None,
             params=None,
             *args, **kwargs
     ):
         mod, method = self.get_plugin(plugin, params)
-        return self.run_plugin_method(mod, recipe, method=method, obj=obj, *args, **kwargs)
+        return self.run_plugin_method(mod, recipe=recipe, method=method, obj=obj, *args, **kwargs)
 
     def resolve_plugin(self, plugin):
         return self.__plugin_map.get(self.__plugin_alias.get(plugin, None), (None, None, None))
 
-    def run_plugin_method(self, mod, recipe, method: str = None, obj=None, *args, **kwargs):
+    def run_plugin_method(self, mod, recipe=None, method: str = None, *args, **kwargs):
         if not method:
             method = self.s.g.conf.plugin_default_entrypoint
-        return getattr(mod, method)(recipe, obj=obj, *args, **kwargs)
+        if recipe:
+            return getattr(mod, method)(recipe, *args, **kwargs)
+        else:
+            return getattr(mod, method)(*args, **kwargs)
 
     def parse_plugin_name(self, name):
         parts = re.split(self.s.g.conf.plugin_delim, name)
