@@ -28,6 +28,11 @@ class PandasDataFrame:
     def __init__(self, session=None):
         self.s = session
 
+    def set_session(self, session):
+        self.s = session
+        # plug_cls, _ = self.s.plugins.get_plugin("mpl_subplots")
+        # self.plot = plug_cls()
+
     @staticmethod
     def apply_to_columns(
             df: pd.DataFrame,

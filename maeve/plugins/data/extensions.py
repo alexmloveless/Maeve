@@ -7,6 +7,7 @@ from .backends.polars import PolarsSeries
 from maeve.models.core import DataLoaderRecipe, FileConcatDataLoaderRecipe
 from maeve.util.function import FuncUtils
 from maeve.util.os import FSUtils as fs
+from maeve.plugins.plot.matplotlib import MplPlot
 import pandas as pd
 import polars as pl
 import importlib
@@ -87,10 +88,21 @@ class DataFrame:
         #     return
         if (self.s and override) or not self.s:
             self.s = session
-            self.pandas.s = session
+            self.pandas.set_session(session)
             self.polars.s = session
 
+        self.plot = PandasMPLPlot(self._df, session)
 
+
+class PandasMPLPlot:
+    def __init__(self, df, session):
+        self.s = session
+        self.df = df
+        # self.plot, _ = self.s.plugins.get_plugin("mpl_subplots")
+        self.plot = MplPlot(session)
+
+    def ts(self, *args, **kwargs):
+        return self.plot.ts(self.df, *args, **kwargs)
 
 @pd.api.extensions.register_series_accessor(g.core.datapackagestub)
 @pl.api.register_series_namespace(g.core.datapackagestub)

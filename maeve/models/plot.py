@@ -31,7 +31,7 @@ class MplSubplotsModel(BaseModel):
 
 
 class MplPlotModel(BaseModel):
-    recipe_type: Literal["mpl_plot"]
+    recipe_type: Optional[Literal["mpl_plot"]] = "mpl_plot"
     plot_type: Optional[str] = None
     data_recipe: Optional[Union[str, dict]] = None
     subplots_kwargs: MplSubplotsModel = MplSubplotsModel()

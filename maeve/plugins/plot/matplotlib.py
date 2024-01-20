@@ -28,7 +28,7 @@ class MplPlot:
         recipe = MplSubplotsModel(**recipe).model_dump()
         return self.subplots(**recipe)
 
-    def mplot(self, recipe: dict, obj: Any = None) -> tuple:
+    def recipe_plot(self, recipe: dict, obj: Any = None) -> tuple:
         recipe = MplPlotModel(**recipe).model_dump()
         if recipe["plot_type"]:
             plot_type = recipe["plot_type"]
@@ -84,7 +84,7 @@ class MplPlot:
             return fig, ax
 
     def __augment_ax(self, ax, data):
-        return ax
+        pass
 
     ##############################################################################
     # Canned plots
@@ -93,12 +93,24 @@ class MplPlot:
     #  - Plots with multiple parts (subplots)
     ##############################################################################
 
+    def __plots(func):
+        def wrapper(self, *args, **kwargs):
+            kwargs["subplots_kwargs"] = MplSubplotsModel(**kwargs.get("subplots_kwargs", {})).model_dump()
+            # del kwargs["subplots_kwargs"]["plot_type"]
+            return func(self, *args, **kwargs)
+        return wrapper
+
     def stackedbar(self, obj, subplots_kwargs=None, bar_kwargs=None):
         fig, ax = self.subplots(**subplots_kwargs)
         bar_kwargs = bar_kwargs if bar_kwargs else {}
         ax.stackedbar(obj, **bar_kwargs)
         return fig, ax
 
+    @__plots
+    def ts(self, obj, subplots_kwargs=None, *args, **kwargs):
+        fig, ax = self.subplots(**subplots_kwargs)
+        ax.ts(obj, *args, **kwargs)
+        return fig, ax
 
 class MPlotProjection(plt.Axes):
     name = "mplot"
