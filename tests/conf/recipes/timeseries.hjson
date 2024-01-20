@@ -1,5 +1,5 @@
 {
-  "TestCSVTimeSeriesTempsLoader" : {
+"TestCSVTimeSeriesTempsLoader" : {
     "recipe_type" : "data_loader",
     "function" : "read_csv",
     "location" : "@TestCSVTimeSeriesTemps",

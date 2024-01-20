@@ -26,7 +26,7 @@ class Plugins:
             "Function": (f"{self.s.g.core.package_name}.plugins.core", "Function", "main"),
             "DataLoader": (f"{self.s.g.core.package_name}.plugins.data.extensions", "DataLoader", "main"),
             "MplSubPlot": (f"{self.s.g.core.package_name}.plugins.plot.matplotlib", "MplPlot", "main"),
-            "MplPlot": (f"{self.s.g.core.package_name}.plugins.plot.matplotlib", "MplPlot", "mplot")
+            "MplPlot": (f"{self.s.g.core.package_name}.plugins.plot.matplotlib", "MplPlot", "recipe_plot")
         }
 
     def get_plugin(
