@@ -23,6 +23,7 @@ class MplSubplotsModel(BaseModel):
     as_obj: bool = False
     subplots_kwargs: dict = {}
     subplot_kw: Optional[MplSubplotkwModel] = MplSubplotkwModel()
+    gridspec_kw: Optional[dict] = None
 
     @model_validator(mode="after")
     def rm_recipe_type(self):
