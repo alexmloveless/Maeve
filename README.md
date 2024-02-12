@@ -1,3 +1,11 @@
+# Maeve - data done quick!
+
+Maeve is a data science toolkit and workflow management tool optimised for fast analysis, visualisation and prototyping in novel data environments built in pure python using Pandas as its primary means of handling data (more back end to come!)
+
+Maeve is made for small teams of itinerant data scientists and analysts who need to get up and running quickly in new data environments while having a familiar, portable toolset, and ease of sharing of data access and processing and analysis pipelines. Since only Python is required, it should be acceptable and functional in all but the most restrictive IT environments. We try to keep dependencies to a minimum in case there's a need to use an organisation's hardware which may have restrictive installation policies. Maeve is at her best when run from a centralised, version-controlled (H)JSON configuration (recipe) repository but is also implemented as a Pandas extension so that many of the functions and recipes can be called as part of functional chains like any other Pandas method.
+
+Meave is still very much is the development, pre-alpha phase. She is functional and useful but will be a bit creaky and inconsistent in places, and wildly incomplete in others!
+
 ## Usage
 
 ```python
