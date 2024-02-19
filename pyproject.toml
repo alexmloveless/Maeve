@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "maeve"
-version = "0.1.3"
+version = "0.1.4"
 description = "Rapid and Reproducable Data Shenanigans!"
 authors = [
     "Alex Loveless <alex@alexloveless.uk>",
